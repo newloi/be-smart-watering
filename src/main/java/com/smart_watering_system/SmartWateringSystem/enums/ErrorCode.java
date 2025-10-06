@@ -44,6 +44,11 @@ public enum ErrorCode {
             HttpStatus.UNAUTHORIZED.value(),
             "Token has expired",
             HttpStatus.UNAUTHORIZED
+    ),
+    UNAUTHENTICATED(
+            HttpStatus.UNAUTHORIZED.value(),
+            "Unauthenticated",
+            HttpStatus.UNAUTHORIZED
     )
 
     ;
