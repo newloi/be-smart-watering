@@ -25,6 +25,11 @@ public enum ErrorCode {
             "Password must be at least {min} characters",
             HttpStatus.BAD_REQUEST
     ),
+    INVALID_USERNAME(
+            HttpStatus.BAD_REQUEST.value(),
+            "Username must be at least {min} characters",
+            HttpStatus.BAD_REQUEST
+    ),
     WRONG_PASSWORD(
             HttpStatus.UNAUTHORIZED.value(),
             "Password is wrong",
