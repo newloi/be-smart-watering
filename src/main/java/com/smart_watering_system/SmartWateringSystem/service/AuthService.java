@@ -6,6 +6,7 @@ import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.smart_watering_system.SmartWateringSystem.dto.request.LoginRequest;
+import com.smart_watering_system.SmartWateringSystem.dto.response.IntrospectResponse;
 import com.smart_watering_system.SmartWateringSystem.dto.response.LoginResponse;
 import com.smart_watering_system.SmartWateringSystem.entity.InvalidatedToken;
 import com.smart_watering_system.SmartWateringSystem.entity.User;
@@ -88,6 +89,14 @@ public class AuthService {
                 .build();
     }
 
+    public IntrospectResponse introspect(String token) throws ParseException, JOSEException {
+        verifyToken(token, false);
+
+        return IntrospectResponse.builder()
+                .isAuthenticate(true)
+                .build();
+    }
+
     private SignedJWT verifyToken(String token, boolean isRefresh) throws JOSEException, ParseException {
         JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
 
@@ -99,7 +108,7 @@ public class AuthService {
 
         var isValid = signedJWT.verify(verifier);
 
-        if(!isValid)
+        if(!isValid || invalidatedTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID()))
             throw new AppException(ErrorCode.INVALID_TOKEN);
 
         if(!expirationTime.after(new Date()))
