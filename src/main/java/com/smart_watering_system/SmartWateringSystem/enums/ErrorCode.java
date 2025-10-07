@@ -60,6 +60,16 @@ public enum ErrorCode {
             "Device not existed",
             HttpStatus.NOT_FOUND
     ),
+    GROUP_EXISTED(
+            HttpStatus.CONFLICT.value(),
+            "Group has been existed",
+            HttpStatus.CONFLICT
+    ),
+    GROUP_NOT_EXISTED(
+            HttpStatus.NOT_FOUND.value(),
+            "Group not existed",
+            HttpStatus.NOT_FOUND
+    ),
 
     ;
 

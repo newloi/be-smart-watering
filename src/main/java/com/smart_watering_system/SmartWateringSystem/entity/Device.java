@@ -11,6 +11,11 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Table(
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"name", "user_id"})
+        }
+)
 public class Device {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -26,4 +31,8 @@ public class Device {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "group_id")
+    Group group;
 }

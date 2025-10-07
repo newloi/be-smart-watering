@@ -13,19 +13,23 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class User {
-
+@Table(
+        name = "group_table",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"name", "user_id"})
+        }
+)
+public class Group {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
+    String name;
+    boolean isWatering;
 
-    @Column(name = "username", unique = true, columnDefinition = "VARCHAR(255) COLLATE utf8mb4_unicode_ci")
-    String username;
-    String password;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    User user;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Device> devices;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    List<Group> groups;
 }
