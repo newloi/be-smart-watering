@@ -1,7 +1,9 @@
 package com.smart_watering_system.SmartWateringSystem.service;
 
+import com.nimbusds.jwt.SignedJWT;
 import com.smart_watering_system.SmartWateringSystem.dto.request.UserRequest;
 import com.smart_watering_system.SmartWateringSystem.dto.response.UserResponse;
+import com.smart_watering_system.SmartWateringSystem.entity.User;
 import com.smart_watering_system.SmartWateringSystem.enums.ErrorCode;
 import com.smart_watering_system.SmartWateringSystem.exception.AppException;
 import com.smart_watering_system.SmartWateringSystem.mapper.UserMapper;
@@ -12,6 +14,8 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.text.ParseException;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +37,16 @@ public class UserService {
         }
 
         return userMapper.toUserResponse(user);
+    }
+
+    public User getUser(String headerAuthorization) throws ParseException {
+        String token = headerAuthorization.startsWith("Bearer ") ? headerAuthorization.substring(7) : headerAuthorization;
+
+        SignedJWT signedToken = SignedJWT.parse(token);
+        String username = signedToken.getJWTClaimsSet().getSubject();
+
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
     }
 
 }

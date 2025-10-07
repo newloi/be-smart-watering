@@ -3,6 +3,7 @@ package com.smart_watering_system.SmartWateringSystem.controller;
 import com.smart_watering_system.SmartWateringSystem.dto.request.UserRequest;
 import com.smart_watering_system.SmartWateringSystem.dto.response.ApiResponse;
 import com.smart_watering_system.SmartWateringSystem.dto.response.UserResponse;
+import com.smart_watering_system.SmartWateringSystem.mapper.UserMapper;
 import com.smart_watering_system.SmartWateringSystem.service.UserService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -10,10 +11,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.text.ParseException;
 
 @RestController
 @RequiredArgsConstructor
@@ -22,12 +22,20 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
     UserService userService;
+    private final UserMapper userMapper;
 
     @PostMapping
     ApiResponse<UserResponse> createUser(@RequestBody @Valid UserRequest request) {
         return ApiResponse.<UserResponse>builder()
                 .statusCode(HttpStatus.CREATED.value())
                 .data(userService.create(request))
+                .build();
+    }
+
+    @GetMapping
+    ApiResponse<UserResponse> getUser(@RequestHeader("Authorization") String headerAuthorization) throws ParseException {
+        return ApiResponse.<UserResponse>builder()
+                .data(userMapper.toUserResponse(userService.getUser(headerAuthorization)))
                 .build();
     }
 
