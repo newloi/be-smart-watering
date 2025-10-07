@@ -1,6 +1,7 @@
 package com.smart_watering_system.SmartWateringSystem.controller;
 
 import com.nimbusds.jose.JOSEException;
+import com.smart_watering_system.SmartWateringSystem.dto.request.IntrospectRequest;
 import com.smart_watering_system.SmartWateringSystem.dto.request.LoginRequest;
 import com.smart_watering_system.SmartWateringSystem.dto.response.ApiResponse;
 import com.smart_watering_system.SmartWateringSystem.dto.response.IntrospectResponse;
@@ -34,14 +35,19 @@ public class AuthController {
     }
 
     @PostMapping("/log-out")
-    ApiResponse<Void> logout(@RequestHeader("Authorization") String token) throws ParseException, JOSEException {
+    ApiResponse<Void> logout(@RequestBody IntrospectRequest request) throws ParseException, JOSEException {
+        var token = request.getToken();
         authService.logout(token.startsWith("Bearer ") ? token.substring(7) : token);
 
-        return ApiResponse.<Void>builder().build();
+        return ApiResponse.<Void>builder()
+                .statusCode(HttpStatus.OK.value())
+                .build();
     }
 
     @PostMapping("/introspect")
-    ApiResponse<IntrospectResponse> introspect(@RequestHeader("Authorization") String token) throws ParseException, JOSEException {
+    ApiResponse<IntrospectResponse> introspect(@RequestBody IntrospectRequest request) throws ParseException, JOSEException {
+        var token = request.getToken();
+
         return ApiResponse.<IntrospectResponse>builder()
                 .statusCode(HttpStatus.OK.value())
                 .data(authService.introspect(token.startsWith("Bearer ") ? token.substring(7) : token))
@@ -49,7 +55,9 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    ApiResponse<LoginResponse> refreshToken(@RequestHeader("Authorization") String token) throws ParseException, JOSEException {
+    ApiResponse<LoginResponse> refreshToken(@RequestBody IntrospectRequest request) throws ParseException, JOSEException {
+        var token = request.getToken();
+
         return ApiResponse.<LoginResponse>builder()
                 .statusCode(HttpStatus.OK.value())
                 .data(authService.refreshToken(token.startsWith("Bearer ") ? token.substring(7) : token))
