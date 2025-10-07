@@ -20,6 +20,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -48,13 +49,13 @@ public class AuthService {
     long refreshableDuration;
 
     UserRepository userRepository;
-    PasswordEncoder passwordEncoder;
     InvalidatedTokenRepository invalidatedTokenRepository;
 
     public LoginResponse login(LoginRequest request) {
         var user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         boolean isAuthenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
         if (!isAuthenticated) throw new AppException(ErrorCode.WRONG_PASSWORD);
 
