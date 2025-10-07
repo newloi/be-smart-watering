@@ -49,7 +49,17 @@ public enum ErrorCode {
             HttpStatus.UNAUTHORIZED.value(),
             "Unauthenticated",
             HttpStatus.UNAUTHORIZED
-    )
+    ),
+    DEVICE_EXISTED(
+            HttpStatus.CONFLICT.value(),
+            "Device has been existed",
+            HttpStatus.CONFLICT
+    ),
+    DEVICE_NOT_EXISTED(
+            HttpStatus.NOT_FOUND.value(),
+            "Device not existed",
+            HttpStatus.NOT_FOUND
+    ),
 
     ;
 
