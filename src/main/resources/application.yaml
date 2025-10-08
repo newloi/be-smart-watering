@@ -17,3 +17,8 @@ jwt:
   valid-duration: 3600
   refreshable-duration: 360000
 
+mqtt:
+  broker: ${BROKER_URL}
+  clientId: smart-watering
+  username: ${BROKER_USERNAME}
+  password: ${BROKER_PASSWORD}
