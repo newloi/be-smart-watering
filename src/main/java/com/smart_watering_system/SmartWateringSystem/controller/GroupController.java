@@ -49,4 +49,24 @@ public class GroupController {
                 .build();
     }
 
+    @PutMapping("/{id}")
+    ApiResponse<GroupDetailResponse> updateGroup(@RequestHeader("Authorization") String headerAuth,
+                                                 @PathVariable("id") String id,
+                                                 @RequestBody GroupRequest request) {
+        return ApiResponse.<GroupDetailResponse>builder()
+                .statusCode(HttpStatus.OK.value())
+                .data(groupService.update(id, request, userService.getUser(headerAuth)))
+                .build();
+    }
+
+    @DeleteMapping("/{id}")
+    ApiResponse<Void> deleteGroup(@RequestHeader("Authorization") String headerAuth,
+                                  @PathVariable("id") String id) {
+        groupService.delete(id, userService.getUser(headerAuth));
+
+        return ApiResponse.<Void>builder()
+                .statusCode(HttpStatus.OK.value())
+                .build();
+    }
+
 }

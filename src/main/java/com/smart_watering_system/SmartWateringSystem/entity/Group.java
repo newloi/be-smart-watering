@@ -30,6 +30,6 @@ public class Group {
     @JoinColumn(name = "user_id")
     User user;
 
-    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "group", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     List<Device> devices;
 }

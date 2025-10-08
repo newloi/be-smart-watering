@@ -12,4 +12,5 @@ import java.util.Optional;
 public interface GroupRepository extends JpaRepository<Group, String> {
     List<Group> findAllByUser(User user);
     Optional<Group> findByIdAndUser(String id, User user);
+    void deleteByIdAndUser(String id, User user);
 }

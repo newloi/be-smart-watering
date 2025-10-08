@@ -33,6 +33,7 @@ public class Device {
     User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "group_id")
+    @JoinColumn(name = "group_id", foreignKey = @ForeignKey(name = "fk_group",
+                    foreignKeyDefinition = "FOREIGN KEY (group_id) REFERENCES group_table(id) ON DELETE SET NULL"))
     Group group;
 }
