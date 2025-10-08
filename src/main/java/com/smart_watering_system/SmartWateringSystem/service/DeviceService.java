@@ -2,6 +2,7 @@ package com.smart_watering_system.SmartWateringSystem.service;
 
 import com.smart_watering_system.SmartWateringSystem.dto.request.DeviceRequest;
 import com.smart_watering_system.SmartWateringSystem.dto.response.DeviceResponse;
+import com.smart_watering_system.SmartWateringSystem.entity.Device;
 import com.smart_watering_system.SmartWateringSystem.entity.User;
 import com.smart_watering_system.SmartWateringSystem.enums.ErrorCode;
 import com.smart_watering_system.SmartWateringSystem.exception.AppException;
@@ -63,6 +64,10 @@ public class DeviceService {
         deviceMapper.updateDevice(device, request);
 
         return deviceMapper.toDeviceResponse(deviceRepository.save(device));
+    }
+
+    public List<DeviceResponse> getAllFree(User user) {
+        return deviceRepository.findByGroupIsNullAndUser(user).stream().map(deviceMapper::toDeviceResponse).toList();
     }
 
 }

@@ -68,4 +68,12 @@ public class DeviceController {
                 .build();
     }
 
+    @GetMapping("/free")
+    ApiResponse<List<DeviceResponse>> getAllFreeDevice(@RequestHeader("Authorization") String headerAuthorizaion) {
+        return ApiResponse.<List<DeviceResponse>>builder()
+                .statusCode(HttpStatus.OK.value())
+                .data(deviceService.getAllFree(userService.getUser(headerAuthorizaion)))
+                .build();
+    }
+
 }
