@@ -12,9 +12,12 @@ import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Service
@@ -24,6 +27,8 @@ public class DeviceService {
 
     DeviceRepository deviceRepository;
     DeviceMapper deviceMapper;
+    MqttClient mqttClient;
+    SensorService sensorService;
 
     public DeviceResponse create(DeviceRequest request, User user) {
         var device = deviceMapper.toDevice(request);
@@ -47,9 +52,16 @@ public class DeviceService {
                 .map(deviceMapper::toDeviceResponse).toList();
     }
 
-    public DeviceResponse get(String id, User user) {
-        return deviceMapper.toDeviceResponse(deviceRepository.findByIdAndUser(id, user)
-                .orElseThrow(() -> new AppException(ErrorCode.DEVICE_NOT_EXISTED)));
+    public DeviceResponse get(String id, User user) throws MqttException {
+        var device = deviceRepository.findByIdAndUser(id, user)
+                .orElseThrow(() -> new AppException(ErrorCode.DEVICE_NOT_EXISTED));
+
+        mqttClient.subscribe(device.getTopicSensor(), (topic, payload) -> {
+            String message = new String(payload.getPayload(), StandardCharsets.UTF_8);
+            sensorService.sendDataSensor(topic, message);
+        });
+
+        return deviceMapper.toDeviceResponse(device);
     }
 
     @Transactional

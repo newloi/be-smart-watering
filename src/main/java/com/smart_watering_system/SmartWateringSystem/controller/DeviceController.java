@@ -8,6 +8,7 @@ import com.smart_watering_system.SmartWateringSystem.service.UserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.eclipse.paho.client.mqttv3.MqttException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,7 +42,7 @@ public class DeviceController {
 
     @GetMapping("/{id}")
     ApiResponse<DeviceResponse> getDevice(@RequestHeader("Authorization") String headerAuthorizaion,
-                                          @PathVariable("id") String id) {
+                                          @PathVariable("id") String id) throws MqttException {
         return ApiResponse.<DeviceResponse>builder()
                 .statusCode(HttpStatus.OK.value())
                 .data(deviceService.get(id, userService.getUser(headerAuthorizaion)))
