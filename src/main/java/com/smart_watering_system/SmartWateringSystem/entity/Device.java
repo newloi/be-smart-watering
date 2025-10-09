@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.List;
+
 @Entity
 @Getter
 @Setter
@@ -28,6 +30,7 @@ public class Device {
     String topicWatering;
     boolean isWatering;
 
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     User user;
@@ -36,4 +39,8 @@ public class Device {
     @JoinColumn(name = "group_id", foreignKey = @ForeignKey(name = "fk_group",
                     foreignKeyDefinition = "FOREIGN KEY (group_id) REFERENCES group_table(id) ON DELETE SET NULL"))
     Group group;
+
+    @OneToMany(mappedBy = "device", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("startTime DESC")
+    List<DeviceWateringHistory> histories;
 }

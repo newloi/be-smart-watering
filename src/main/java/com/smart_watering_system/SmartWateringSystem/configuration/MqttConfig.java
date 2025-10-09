@@ -2,13 +2,13 @@ package com.smart_watering_system.SmartWateringSystem.configuration;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
-import org.eclipse.paho.client.mqttv3.MqttClient;
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
-import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.UUID;
 
 @Configuration
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -28,7 +28,7 @@ public class MqttConfig {
 
     @Bean
     MqttClient mqttClient() throws MqttException {
-        MqttClient client = new MqttClient(broker, clientId, new MemoryPersistence());
+        MqttClient client = new MqttClient(broker, clientId + UUID.randomUUID(), new MemoryPersistence());
 
         MqttConnectOptions connectOptions = new MqttConnectOptions();
         connectOptions.setUserName(username);
@@ -38,6 +38,23 @@ public class MqttConfig {
         connectOptions.setConnectionTimeout(10);
 
         client.connect(connectOptions);
+        client.setCallback(new MqttCallbackExtended() {
+            @Override
+            public void connectComplete(boolean reconnect, String serverURI) {
+                System.out.println("✅ MQTT connected to: " + serverURI);
+            }
+
+            @Override
+            public void connectionLost(Throwable cause) {
+                System.out.println("⚠️ MQTT connection lost: " + cause.getMessage());
+            }
+
+            @Override
+            public void messageArrived(String topic, MqttMessage message) {}
+
+            @Override
+            public void deliveryComplete(IMqttDeliveryToken token) {}
+        });
 
         return client;
     }
