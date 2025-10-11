@@ -48,7 +48,8 @@ public class DeviceWateringService {
                 .filter(list -> !list.isEmpty())
                 .map(List::getFirst)
                 .orElse(null);
-        boolean isRunning = !Objects.isNull(recentWatering) ? LocalDateTime.now().isBefore(recentWatering.getStartTime().plusSeconds(recentWatering.getDuration())) : false;
+        boolean isRunning = !Objects.isNull(recentWatering) && LocalDateTime.now()
+                .isBefore(recentWatering.getStartTime().plusSeconds(recentWatering.getDuration()));
 
         ObjectMapper objectMapper = new ObjectMapper();
         String message = objectMapper.writeValueAsString(request);

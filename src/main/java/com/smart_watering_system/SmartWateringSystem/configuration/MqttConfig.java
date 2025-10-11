@@ -1,5 +1,6 @@
 package com.smart_watering_system.SmartWateringSystem.configuration;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.smart_watering_system.SmartWateringSystem.service.SensorService;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
@@ -56,7 +57,7 @@ public class MqttConfig {
             }
 
             @Override
-            public void messageArrived(String topic, MqttMessage payload) {
+            public void messageArrived(String topic, MqttMessage payload) throws JsonProcessingException {
                 String message = new String(payload.getPayload(), StandardCharsets.UTF_8);
                 sensorService.sendData(topic, message);
             }
