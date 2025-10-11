@@ -43,4 +43,7 @@ public class Device {
     @OneToMany(mappedBy = "device", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("startTime DESC")
     List<DeviceWateringHistory> histories;
+
+    @OneToMany(mappedBy = "device", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<DataSensorHistory> dataSensorHistoryList;
 }
