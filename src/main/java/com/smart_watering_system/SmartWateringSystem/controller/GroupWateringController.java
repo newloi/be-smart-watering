@@ -5,6 +5,7 @@ import com.smart_watering_system.SmartWateringSystem.dto.request.WateringRequest
 import com.smart_watering_system.SmartWateringSystem.dto.response.ApiResponse;
 import com.smart_watering_system.SmartWateringSystem.dto.response.WateringResponse;
 import com.smart_watering_system.SmartWateringSystem.service.DeviceWateringService;
+import com.smart_watering_system.SmartWateringSystem.service.GroupWateringService;
 import com.smart_watering_system.SmartWateringSystem.service.UserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -16,30 +17,22 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/devices/{id}/watering")
+@RequestMapping("/groups/{id}/watering")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class DeviceWateringController {
+public class GroupWateringController {
 
-    DeviceWateringService deviceWateringService;
+    GroupWateringService groupWateringService;
     UserService userService;
 
     @PostMapping
-    ApiResponse<WateringResponse> doAction(@RequestHeader("Authorization") String headerAuth,
+    ApiResponse<Void> doAction(@RequestHeader("Authorization") String headerAuth,
                                            @RequestBody WateringRequest request,
                                            @PathVariable("id") String id) throws MqttException, JsonProcessingException {
-        return ApiResponse.<WateringResponse>builder()
-                .statusCode(HttpStatus.OK.value())
-                .data(deviceWateringService.doAction(id, request, userService.getUser(headerAuth), false))
-                .build();
-    }
+        groupWateringService.doAction(id, request, userService.getUser(headerAuth));
 
-    @GetMapping("/history")
-    ApiResponse<List<WateringResponse>> getAllHistories(@RequestHeader("Authorization") String headerAuth,
-                                                        @PathVariable String id) {
-        return ApiResponse.<List<WateringResponse>>builder()
+        return ApiResponse.<Void>builder()
                 .statusCode(HttpStatus.OK.value())
-                .data(deviceWateringService.getAllHistories(id, userService.getUser(headerAuth)))
                 .build();
     }
 

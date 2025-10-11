@@ -13,6 +13,7 @@ import com.smart_watering_system.SmartWateringSystem.exception.AppException;
 import com.smart_watering_system.SmartWateringSystem.mapper.WateringMapper;
 import com.smart_watering_system.SmartWateringSystem.repository.DeviceRepository;
 import com.smart_watering_system.SmartWateringSystem.repository.DeviceWateringHistoryRepository;
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -35,11 +36,12 @@ import java.util.Optional;
 public class DeviceWateringService {
 
     DeviceWateringHistoryRepository deviceWateringHistoryRepository;
-    MqttClient mqttClient;
+    MqttSevice mqttSevice;
     WateringMapper wateringMapper;
     DeviceRepository deviceRepository;
 
-    public WateringResponse doAction(String id, WateringRequest request, User user) throws MqttException, JsonProcessingException {
+    @Transactional
+    public WateringResponse doAction(String id, WateringRequest request, User user, boolean byGroup) throws MqttException, JsonProcessingException {
         Device device = deviceRepository.findByIdAndUser(id, user)
                 .orElseThrow(() -> new AppException(ErrorCode.DEVICE_NOT_EXISTED));
 
@@ -52,37 +54,39 @@ public class DeviceWateringService {
 
         ObjectMapper objectMapper = new ObjectMapper();
         String message = objectMapper.writeValueAsString(request);
-        MqttMessage mqttMessage = new MqttMessage(message.getBytes());
-        mqttMessage.setQos(1);
 
         if (Objects.equals(action, Action.START.name())) {
-            if(isRunning)
-                throw new AppException(ErrorCode.DEVICE_IS_RUNNING);
+            if(!isRunning) {
 
-            mqttClient.publish(device.getTopicWatering(), mqttMessage);
+                mqttSevice.publishAsync(device.getTopicWatering(), message);
 
-            DeviceWateringHistory history = wateringMapper.toDeviceWateringHistory(request);
-            history.setDevice(device);
-            history = deviceWateringHistoryRepository.save(history);
+                DeviceWateringHistory history = wateringMapper.toDeviceWateringHistory(request);
+                history.setDevice(device);
+                history.setByGroup(byGroup);
+                history = deviceWateringHistoryRepository.save(history);
 
-            var response = wateringMapper.toWateringResponse(history);
-            response.setAction(action);
+                var response = wateringMapper.toWateringResponse(history);
+                response.setAction(action);
 
-            return response;
+                return response;
+            }
 
         } else if (Objects.equals(action, Action.STOP.name())) {
-            if(!isRunning) throw new AppException(ErrorCode.DEVICE_STOPPED);
+            if(isRunning) {
 
-            mqttClient.publish(device.getTopicWatering(), mqttMessage);
+                mqttSevice.publishAsync(device.getTopicWatering(), message);
 
-            recentWatering.setDuration(ChronoUnit.SECONDS.between(recentWatering.getStartTime(), LocalDateTime.now()));
-            var history = deviceWateringHistoryRepository.save(recentWatering);
+                recentWatering.setDuration(ChronoUnit.SECONDS.between(recentWatering.getStartTime(), LocalDateTime.now()));
+                var history = deviceWateringHistoryRepository.save(recentWatering);
 
-            var response = wateringMapper.toWateringResponse(history);
-            response.setAction(action);
+                var response = wateringMapper.toWateringResponse(history);
+                response.setAction(action);
 
-            return response;
+                return response;
+            }
         } else throw new AppException(ErrorCode.INVALID_ACTION);
+
+        return WateringResponse.builder().build();
     }
 
     public List<WateringResponse> getAllHistories(String id, User user) {

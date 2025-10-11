@@ -13,6 +13,6 @@ import java.time.LocalDateTime;
 public class WateringResponse {
     String action;
     long duration;
-    boolean isByGroup;
+    boolean byGroup;
     LocalDateTime startTime;
 }

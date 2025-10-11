@@ -84,6 +84,11 @@ public enum ErrorCode {
             HttpStatus.BAD_REQUEST.value(),
             "Device isn't running",
             HttpStatus.BAD_REQUEST
+    ),
+    GROUP_STOPPED(
+            HttpStatus.BAD_REQUEST.value(),
+            "Group isn't running",
+            HttpStatus.BAD_REQUEST
     )
 
     ;

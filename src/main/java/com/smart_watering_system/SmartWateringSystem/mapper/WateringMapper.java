@@ -5,7 +5,6 @@ import com.smart_watering_system.SmartWateringSystem.dto.response.WateringRespon
 import com.smart_watering_system.SmartWateringSystem.entity.DeviceWateringHistory;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Named;
 
 @Mapper(componentModel = "spring")
 public interface WateringMapper{
