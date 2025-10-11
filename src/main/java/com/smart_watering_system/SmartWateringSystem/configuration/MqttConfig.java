@@ -1,13 +1,16 @@
 package com.smart_watering_system.SmartWateringSystem.configuration;
 
+import com.smart_watering_system.SmartWateringSystem.service.SensorService;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 @Configuration
@@ -25,6 +28,9 @@ public class MqttConfig {
 
     @Value("${mqtt.password}")
     String password;
+
+    @Autowired
+    SensorService sensorService;
 
     @Bean
     MqttClient mqttClient() throws MqttException {
@@ -50,7 +56,10 @@ public class MqttConfig {
             }
 
             @Override
-            public void messageArrived(String topic, MqttMessage message) {}
+            public void messageArrived(String topic, MqttMessage payload) {
+                String message = new String(payload.getPayload(), StandardCharsets.UTF_8);
+                sensorService.sendData(topic, message);
+            }
 
             @Override
             public void deliveryComplete(IMqttDeliveryToken token) {}

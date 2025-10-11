@@ -2,7 +2,6 @@ package com.smart_watering_system.SmartWateringSystem.service;
 
 import com.smart_watering_system.SmartWateringSystem.dto.request.DeviceRequest;
 import com.smart_watering_system.SmartWateringSystem.dto.response.DeviceResponse;
-import com.smart_watering_system.SmartWateringSystem.entity.Device;
 import com.smart_watering_system.SmartWateringSystem.entity.User;
 import com.smart_watering_system.SmartWateringSystem.enums.ErrorCode;
 import com.smart_watering_system.SmartWateringSystem.exception.AppException;
@@ -27,8 +26,7 @@ public class DeviceService {
 
     DeviceRepository deviceRepository;
     DeviceMapper deviceMapper;
-    MqttClient mqttClient;
-    SensorService sensorService;
+    MqttSevice mqttSevice;
 
     public DeviceResponse create(DeviceRequest request, User user) {
         var device = deviceMapper.toDevice(request);
@@ -56,10 +54,7 @@ public class DeviceService {
         var device = deviceRepository.findByIdAndUser(id, user)
                 .orElseThrow(() -> new AppException(ErrorCode.DEVICE_NOT_EXISTED));
 
-        mqttClient.subscribe(device.getTopicSensor(), (topic, payload) -> {
-            String message = new String(payload.getPayload(), StandardCharsets.UTF_8);
-            sensorService.sendDataSensor(topic, message);
-        });
+        mqttSevice.subcribeAsync(device.getTopicSensor(), device.getTopicWatering());
 
         return deviceMapper.toDeviceResponse(device);
     }

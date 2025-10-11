@@ -15,12 +15,10 @@ public class SensorService {
 
     SimpMessagingTemplate simpMessagingTemplate;
 
-    public void sendDataSensor(String topic, String payload) {
-        String deviceId = topic.substring(7);
+    public void sendData(String topic, String payload) {
+        simpMessagingTemplate.convertAndSend("/device/" + topic, payload);
 
-        simpMessagingTemplate.convertAndSend("/device/" + deviceId, payload);
-
-        log.info("DeviceId: " + deviceId + ", Data: " + payload);
+        log.info("Topic: " + topic + ", Data: " + payload);
     }
 
 }
