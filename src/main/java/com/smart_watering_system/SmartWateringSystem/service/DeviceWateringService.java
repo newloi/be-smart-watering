@@ -41,22 +41,22 @@ public class DeviceWateringService {
     DeviceRepository deviceRepository;
 
     @Transactional
-    public WateringResponse doAction(String id, WateringRequest request, User user, boolean byGroup) throws MqttException, JsonProcessingException {
+    public WateringResponse doAction(String id, WateringRequest request, User user, boolean byGroup)
+            throws MqttException, JsonProcessingException {
         Device device = deviceRepository.findByIdAndUser(id, user)
                 .orElseThrow(() -> new AppException(ErrorCode.DEVICE_NOT_EXISTED));
 
         String action = request.getAction();
-        DeviceWateringHistory recentWatering = Optional.ofNullable(device.getHistories())
-                .filter(list -> !list.isEmpty())
-                .map(List::getFirst)
-                .orElse(null);
-        boolean isRunning = !Objects.isNull(recentWatering) ? LocalDateTime.now().isBefore(recentWatering.getStartTime().plusSeconds(recentWatering.getDuration())) : false;
+        DeviceWateringHistory recentWatering = device.getHistories().isEmpty() ? null : device.getHistories().getFirst();
+        boolean isRunning = !Objects.isNull(recentWatering)
+                ? LocalDateTime.now().isBefore(recentWatering.getStartTime().plusSeconds(recentWatering.getDuration()))
+                : false;
 
         ObjectMapper objectMapper = new ObjectMapper();
         String message = objectMapper.writeValueAsString(request);
 
         if (Objects.equals(action, Action.START.name())) {
-            if(!isRunning) {
+            if (!isRunning) {
 
                 mqttSevice.publishAsync(device.getTopicWatering(), message);
 
@@ -72,11 +72,13 @@ public class DeviceWateringService {
             }
 
         } else if (Objects.equals(action, Action.STOP.name())) {
-            if(isRunning) {
+            if (isRunning) {
 
                 mqttSevice.publishAsync(device.getTopicWatering(), message);
 
-                recentWatering.setDuration(ChronoUnit.SECONDS.between(recentWatering.getStartTime(), LocalDateTime.now()));
+                recentWatering.setDuration(
+                        ChronoUnit.SECONDS.between(recentWatering.getStartTime(), LocalDateTime.now())
+                );
                 var history = deviceWateringHistoryRepository.save(recentWatering);
 
                 var response = wateringMapper.toWateringResponse(history);
@@ -93,7 +95,8 @@ public class DeviceWateringService {
         Device device = deviceRepository.findByIdAndUser(id, user)
                 .orElseThrow(() -> new AppException(ErrorCode.DEVICE_NOT_EXISTED));
 
-        List<DeviceWateringHistory> histories = deviceWateringHistoryRepository.findAllByDevice(device, Pageable.ofSize(10));
+        List<DeviceWateringHistory> histories = deviceWateringHistoryRepository
+                .findAllByDevice(device, Pageable.ofSize(10));
         return histories.stream().map(wateringMapper::toWateringResponse).toList();
     }
 

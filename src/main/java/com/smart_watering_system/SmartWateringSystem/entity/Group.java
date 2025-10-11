@@ -32,4 +32,8 @@ public class Group {
 
     @OneToMany(mappedBy = "group", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     List<Device> devices;
+
+    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("startTime DESC")
+    List<GroupWateringHistory> histories;
 }

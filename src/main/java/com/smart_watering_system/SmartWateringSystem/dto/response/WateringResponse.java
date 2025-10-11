@@ -1,5 +1,6 @@
 package com.smart_watering_system.SmartWateringSystem.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 

@@ -26,13 +26,22 @@ public class GroupWateringController {
     UserService userService;
 
     @PostMapping
-    ApiResponse<Void> doAction(@RequestHeader("Authorization") String headerAuth,
+    ApiResponse<WateringResponse> doAction(@RequestHeader("Authorization") String headerAuth,
                                            @RequestBody WateringRequest request,
-                                           @PathVariable("id") String id) throws MqttException, JsonProcessingException {
-        groupWateringService.doAction(id, request, userService.getUser(headerAuth));
+                                           @PathVariable("id") String id) {
 
-        return ApiResponse.<Void>builder()
+        return ApiResponse.<WateringResponse>builder()
                 .statusCode(HttpStatus.OK.value())
+                .data(groupWateringService.doAction(id, request, userService.getUser(headerAuth)))
+                .build();
+    }
+
+    @GetMapping("/history")
+    ApiResponse<List<WateringResponse>> getAllHistories(@RequestHeader("Authorization") String headerAuth,
+                                                        @PathVariable String id) {
+        return ApiResponse.<List<WateringResponse>>builder()
+                .statusCode(HttpStatus.OK.value())
+                .data(groupWateringService.getAllHistories(id, userService.getUser(headerAuth)))
                 .build();
     }
 
