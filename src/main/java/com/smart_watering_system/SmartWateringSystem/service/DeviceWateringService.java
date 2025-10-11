@@ -18,9 +18,9 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -93,7 +93,7 @@ public class DeviceWateringService {
         Device device = deviceRepository.findByIdAndUser(id, user)
                 .orElseThrow(() -> new AppException(ErrorCode.DEVICE_NOT_EXISTED));
 
-        List<DeviceWateringHistory> histories = deviceWateringHistoryRepository.findAllByDevice(device);
+        List<DeviceWateringHistory> histories = deviceWateringHistoryRepository.findAllByDevice(device, Pageable.ofSize(10));
         return histories.stream().map(wateringMapper::toWateringResponse).toList();
     }
 
