@@ -1,6 +1,7 @@
 package com.smart_watering_system.SmartWateringSystem.configuration;
 
 import com.nimbusds.jose.JOSEException;
+import com.smart_watering_system.SmartWateringSystem.exception.AppException;
 import com.smart_watering_system.SmartWateringSystem.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,6 +10,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.oauth2.server.resource.InvalidBearerTokenException;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.spec.SecretKeySpec;
@@ -27,9 +29,9 @@ public class CustomJwtDecoder implements JwtDecoder {
     public Jwt decode(String token) throws JwtException {
         try {
             authService.introspect(token);
-        } catch (ParseException | JOSEException e) {
-            throw new JwtException(e.getMessage());
-        }
+        } catch (AppException exception) {
+            throw new InvalidBearerTokenException(exception.getErrorCode().name(), exception);
+        } catch (ParseException | JOSEException ignored) {}
 
         SecretKeySpec secretKeySpec = new SecretKeySpec(SIGNER_KEY.getBytes(), "HS512");
 

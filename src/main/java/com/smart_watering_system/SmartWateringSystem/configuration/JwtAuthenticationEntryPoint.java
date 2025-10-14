@@ -3,6 +3,7 @@ package com.smart_watering_system.SmartWateringSystem.configuration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.smart_watering_system.SmartWateringSystem.dto.response.ApiResponse;
 import com.smart_watering_system.SmartWateringSystem.enums.ErrorCode;
+import com.smart_watering_system.SmartWateringSystem.exception.AppException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -18,9 +19,15 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException)
-            throws IOException, ServletException {
-        log.info("Authentication Entry Point");
+            throws IOException {
         ErrorCode errorCode = ErrorCode.UNAUTHENTICATED;
+
+        Throwable cause = authException.getCause();
+        if (cause instanceof AppException appException) {
+            errorCode = appException.getErrorCode();
+        }
+
+
 
         response.setStatus(errorCode.getStatusCode());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);

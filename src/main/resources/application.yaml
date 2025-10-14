@@ -20,7 +20,7 @@ spring:
 
 jwt:
   signerKey: ${SIGNER_KEY}
-  valid-duration: 3600
+  valid-duration: 36
   refreshable-duration: 360000
 
 mqtt:
