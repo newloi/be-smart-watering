@@ -2,6 +2,7 @@ package com.smart_watering_system.SmartWateringSystem.service;
 
 import com.smart_watering_system.SmartWateringSystem.dto.request.DeviceRequest;
 import com.smart_watering_system.SmartWateringSystem.dto.response.DeviceResponse;
+import com.smart_watering_system.SmartWateringSystem.entity.Device;
 import com.smart_watering_system.SmartWateringSystem.entity.User;
 import com.smart_watering_system.SmartWateringSystem.enums.ErrorCode;
 import com.smart_watering_system.SmartWateringSystem.exception.AppException;
@@ -27,6 +28,7 @@ public class DeviceService {
     DeviceRepository deviceRepository;
     DeviceMapper deviceMapper;
     MqttSevice mqttSevice;
+    UserService userService;
 
     public DeviceResponse create(DeviceRequest request, User user) {
         var device = deviceMapper.toDevice(request);
@@ -75,6 +77,11 @@ public class DeviceService {
 
     public List<DeviceResponse> getAllFree(User user) {
         return deviceRepository.findByGroupIsNullAndUser(user).stream().map(deviceMapper::toDeviceResponse).toList();
+    }
+
+    public Device getByUser(String id, String authHeader) {
+        return deviceRepository.findByIdAndUser(id, userService.getUser(authHeader))
+                .orElseThrow(() -> new AppException(ErrorCode.DEVICE_NOT_EXISTED));
     }
 
 }

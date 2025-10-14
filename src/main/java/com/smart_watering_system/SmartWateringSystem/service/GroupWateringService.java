@@ -55,13 +55,13 @@ public class GroupWateringService {
             });
         });
 
-        String action = request.getAction();
+        Action action = request.getAction();
         GroupWateringHistory recentWatering = group.getHistories().isEmpty() ? null : group.getHistories().getFirst();
         boolean isRunning = !Objects.isNull(recentWatering)
                 ? LocalDateTime.now().isBefore(recentWatering.getStartTime().plusSeconds(recentWatering.getDuration()))
                 : false;
 
-        if (Objects.equals(action, Action.START.name())) {
+        if (action == Action.START) {
             if (!isRunning) {
 
                 GroupWateringHistory history = wateringMapper.toGroupWateringHistory(request);
@@ -74,7 +74,7 @@ public class GroupWateringService {
                 return response;
             }
 
-        } else if (Objects.equals(action, Action.STOP.name())) {
+        } else if (action == Action.STOP) {
             if (isRunning) {
                 recentWatering.setDuration(
                         ChronoUnit.SECONDS.between(recentWatering.getStartTime(), LocalDateTime.now())
@@ -97,7 +97,7 @@ public class GroupWateringService {
                 .orElseThrow(() -> new AppException(ErrorCode.GROUP_NOT_EXISTED));
 
         List<GroupWateringHistory> histories = groupWateringHistoryRepository
-                .findAllByGroup(group, Pageable.ofSize(10));
+                .findAllByGroupOrderByStartTimeDesc(group, Pageable.ofSize(10));
         return histories.stream().map(wateringMapper::toWateringResponse).toList();
     }
 

@@ -28,6 +28,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -46,16 +47,15 @@ public class DeviceWateringService {
         Device device = deviceRepository.findByIdAndUser(id, user)
                 .orElseThrow(() -> new AppException(ErrorCode.DEVICE_NOT_EXISTED));
 
-        String action = request.getAction();
+        Action action = request.getAction();
         DeviceWateringHistory recentWatering = device.getHistories().isEmpty() ? null : device.getHistories().getFirst();
-        boolean isRunning = !Objects.isNull(recentWatering)
-                ? LocalDateTime.now().isBefore(recentWatering.getStartTime().plusSeconds(recentWatering.getDuration()))
-                : false;
+        boolean isRunning = !Objects.isNull(recentWatering) && LocalDateTime.now().isBefore(recentWatering.getStartTime()
+                .plusSeconds(recentWatering.getDuration()));
 
         ObjectMapper objectMapper = new ObjectMapper();
         String message = objectMapper.writeValueAsString(request);
 
-        if (Objects.equals(action, Action.START.name())) {
+        if (action == Action.START) {
             if (!isRunning) {
 
                 mqttSevice.publishAsync(device.getTopicWatering(), message);
@@ -71,7 +71,7 @@ public class DeviceWateringService {
                 return response;
             }
 
-        } else if (Objects.equals(action, Action.STOP.name())) {
+        } else if (action == Action.STOP) {
             if (isRunning) {
 
                 mqttSevice.publishAsync(device.getTopicWatering(), message);
@@ -96,8 +96,31 @@ public class DeviceWateringService {
                 .orElseThrow(() -> new AppException(ErrorCode.DEVICE_NOT_EXISTED));
 
         List<DeviceWateringHistory> histories = deviceWateringHistoryRepository
-                .findAllByDevice(device, Pageable.ofSize(10));
+                .findAllByDeviceOrderByStartTimeDesc(device, Pageable.ofSize(10));
         return histories.stream().map(wateringMapper::toWateringResponse).toList();
+    }
+
+    public void runStartByScheduler(String id, long duration) {
+        Device device = deviceRepository.findByIdWithHistories(id);
+        DeviceWateringHistory recentWatering = device.getHistories().isEmpty() ? null : device.getHistories().getFirst();
+        boolean isRunning = !Objects.isNull(recentWatering) && LocalDateTime.now().isBefore(recentWatering.getStartTime()
+                .plusSeconds(recentWatering.getDuration()));
+
+        if (!isRunning) {
+            WateringRequest request = new WateringRequest(Action.START, duration);
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            String message = null;
+            try {
+                message = objectMapper.writeValueAsString(request);
+                mqttSevice.publishAsync(device.getTopicWatering(), message);
+            } catch (JsonProcessingException | MqttException ignored) {}
+
+            DeviceWateringHistory history = wateringMapper.toDeviceWateringHistory(request);
+            history.setDevice(device);
+            history.setByGroup(false);
+            deviceWateringHistoryRepository.save(history);
+        }
     }
 
 }

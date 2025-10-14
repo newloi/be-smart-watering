@@ -36,7 +36,7 @@ public class DeviceWateringController {
 
     @GetMapping("/history")
     ApiResponse<List<WateringResponse>> getAllHistories(@RequestHeader("Authorization") String headerAuth,
-                                                        @PathVariable String id) {
+                                                        @PathVariable("id") String id) {
         return ApiResponse.<List<WateringResponse>>builder()
                 .statusCode(HttpStatus.OK.value())
                 .data(deviceWateringService.getAllHistories(id, userService.getUser(headerAuth)))
