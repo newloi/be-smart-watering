@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalTime;
 import java.util.Date;
+import java.util.Map;
+import java.util.concurrent.ScheduledFuture;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,6 +30,7 @@ public class SchedulerService {
     ScheduleMapper scheduleMapper;
     TaskScheduler taskScheduler;
     DeviceWateringService deviceWateringService;
+    Map<String, ScheduledFuture<?>> allSchedules;
 
     public ScheduleResponse create(String id, ScheduleRequest request, String authHeader) {
         var device = deviceService.getByUser(id, authHeader);
@@ -56,17 +59,21 @@ public class SchedulerService {
             }
             case ONE_TIME -> {
                 if(schedule.getDateOneTime().after(new Date())) {
-                    taskScheduler.schedule(() ->
+                    var scheduler = taskScheduler.schedule(() ->
                                     deviceWateringService.runStartByScheduler(schedule.getDevice().getId(), schedule.getDuration()),
                             schedule.getDateOneTime());
+
+                    allSchedules.put(schedule.getId(), scheduler);
                 }
                 return;
             }
         }
 
-        taskScheduler.schedule(() ->
+        var scheduler = taskScheduler.schedule(() ->
                 deviceWateringService.runStartByScheduler(schedule.getDevice().getId(), schedule.getDuration()),
                 new CronTrigger(cronExpression));
+
+        allSchedules.put(schedule.getId(), scheduler);
     }
 
 }
