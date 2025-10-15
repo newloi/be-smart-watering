@@ -32,7 +32,6 @@ public class UserService {
     UserRepository userRepository;
     UserMapper userMapper;
     PasswordEncoder passwordEncoder;
-    InvalidatedTokenRepository invalidatedTokenRepository;
 
     public UserResponse create(UserRequest request) {
         var user = userMapper.toUser(request);
@@ -55,13 +54,6 @@ public class UserService {
 
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-    }
-
-    @Scheduled(cron = "0 0 0 * * *")
-    public void cleanInvalidateTokenTable() {
-        List<InvalidatedToken> invalidatedTokens = invalidatedTokenRepository.findByExpiryTimeBefore(new Date());
-
-        invalidatedTokenRepository.deleteAll(invalidatedTokens);
     }
 
 }
