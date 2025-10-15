@@ -23,10 +23,10 @@ public class DeviceSchedule {
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
     LocalTime startTime;
-    Date dateOneTime;
     long duration;
     Repeat repeatType;
     List<Day> daysOfWeek;
+    boolean status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "device_id")
