@@ -70,11 +70,6 @@ public enum ErrorCode {
             "Group not existed",
             HttpStatus.NOT_FOUND
     ),
-    DEVICE_IS_RUNNING(
-            HttpStatus.CONFLICT.value(),
-            "Device is running",
-            HttpStatus.CONFLICT
-    ),
     INVALID_ACTION(
             HttpStatus.BAD_REQUEST.value(),
             "Invalid action",
@@ -85,10 +80,10 @@ public enum ErrorCode {
             "Device isn't running",
             HttpStatus.BAD_REQUEST
     ),
-    GROUP_STOPPED(
-            HttpStatus.BAD_REQUEST.value(),
-            "Group isn't running",
-            HttpStatus.BAD_REQUEST
+    SCHEDULE_NOT_EXISTED(
+            HttpStatus.NOT_FOUND.value(),
+            "Schedule not existed",
+            HttpStatus.NOT_FOUND
     )
 
     ;

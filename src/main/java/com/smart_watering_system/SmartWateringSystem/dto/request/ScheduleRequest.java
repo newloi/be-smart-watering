@@ -16,7 +16,6 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ScheduleRequest {
     LocalTime startTime;
-    Date dateOneTime;
     long duration;
     Repeat repeatType;
     List<Day> daysOfWeek;

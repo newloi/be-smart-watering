@@ -28,4 +28,28 @@ public class ScheduleController {
                 .build();
     }
 
+    @DeleteMapping("{scheduleId}")
+    public ApiResponse<Void> deleteSchedule(@RequestHeader("Authorization") String authHeader,
+                                            @PathVariable("id") String id,
+                                            @PathVariable("scheduleId") String scheduleId) {
+        schedulerService.deleteSchedule(authHeader, id, scheduleId);
+
+        return ApiResponse.<Void>builder()
+                .statusCode(HttpStatus.OK.value())
+                .build();
+    }
+
+    @PutMapping("{scheduleId}")
+    public ApiResponse<ScheduleResponse> updateSchedule(@RequestHeader("Authorization") String authHeader,
+                                                        @RequestBody ScheduleRequest request,
+                                                        @PathVariable("id") String id,
+                                                        @PathVariable("scheduleId") String scheduleId) {
+        return ApiResponse.<ScheduleResponse>builder()
+                .statusCode(HttpStatus.OK.value())
+                .data(schedulerService.update(authHeader, id, scheduleId, request))
+                .build();
+    }
+
+
+
 }

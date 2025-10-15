@@ -19,8 +19,8 @@ import java.util.List;
 public class ScheduleResponse {
     String id;
     LocalTime startTime;
-    Date dateOneTime;
     long duration;
     Repeat repeatType;
     List<Day> daysOfWeek;
+    boolean status;
 }
