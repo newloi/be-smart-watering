@@ -19,4 +19,5 @@ public class ScheduleRequest {
     long duration;
     Repeat repeatType;
     List<Day> daysOfWeek;
+    boolean status;
 }

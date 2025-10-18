@@ -127,4 +127,13 @@ public class SchedulerService {
         return scheduleMapper.toScheduleResponse(schedule);
     }
 
+    public void trigger(String authHeader, String id, String scheduleId, ScheduleRequest request) {
+        var device = deviceService.getByUser(id, authHeader);
+        var schedule = deviceScheduleRepository.findByIdAndDevice(scheduleId, device)
+                .orElseThrow(() -> new AppException(ErrorCode.SCHEDULE_NOT_EXISTED));
+
+        if (request.isStatus() && schedule.isStatus()) turnOffSchedule(schedule);
+        else if(!request.isStatus() && !schedule.isStatus()) turnOnSchedule(schedule);
+    }
+
 }

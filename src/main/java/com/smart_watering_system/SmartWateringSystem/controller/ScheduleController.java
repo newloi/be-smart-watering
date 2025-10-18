@@ -28,7 +28,7 @@ public class ScheduleController {
                 .build();
     }
 
-    @DeleteMapping("{scheduleId}")
+    @DeleteMapping("/{scheduleId}")
     public ApiResponse<Void> deleteSchedule(@RequestHeader("Authorization") String authHeader,
                                             @PathVariable("id") String id,
                                             @PathVariable("scheduleId") String scheduleId) {
@@ -39,7 +39,7 @@ public class ScheduleController {
                 .build();
     }
 
-    @PutMapping("{scheduleId}")
+    @PutMapping("/{scheduleId}")
     public ApiResponse<ScheduleResponse> updateSchedule(@RequestHeader("Authorization") String authHeader,
                                                         @RequestBody ScheduleRequest request,
                                                         @PathVariable("id") String id,
@@ -50,6 +50,16 @@ public class ScheduleController {
                 .build();
     }
 
+    @PostMapping("/{scheduleId}/trigger")
+    public ApiResponse<Void> triggerSchedule(@RequestHeader("Authorization") String authHeader,
+                                             @RequestBody ScheduleRequest request,
+                                             @PathVariable("id") String id,
+                                             @PathVariable("scheduleId") String scheduleId) {
+        schedulerService.trigger(authHeader, id, scheduleId, request);
 
+        return ApiResponse.<Void>builder()
+                .statusCode(HttpStatus.OK.value())
+                .build();
+    }
 
 }
