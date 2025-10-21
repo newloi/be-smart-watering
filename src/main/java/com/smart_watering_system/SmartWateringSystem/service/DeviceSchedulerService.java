@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class SchedulerService {
+public class DeviceSchedulerService {
 
     DeviceScheduleRepository deviceScheduleRepository;
     DeviceService deviceService;
@@ -65,7 +65,7 @@ public class SchedulerService {
 
                 var scheduler = taskScheduler.schedule(() ->
                         {
-                            deviceWateringService.runStartByScheduler(schedule.getDevice().getId(), schedule.getDuration());
+                            deviceWateringService.runByScheduler(schedule.getDevice().getId(), schedule.getDuration(), false);
                             turnOffSchedule(schedule);
                         },
                         new CronTrigger(cronExpression));
@@ -77,7 +77,7 @@ public class SchedulerService {
         }
 
         var scheduler = taskScheduler.schedule(() ->
-                deviceWateringService.runStartByScheduler(schedule.getDevice().getId(), schedule.getDuration()),
+                deviceWateringService.runByScheduler(schedule.getDevice().getId(), schedule.getDuration(), false),
                 new CronTrigger(cronExpression));
 
         schedules.put(schedule.getId(), scheduler);

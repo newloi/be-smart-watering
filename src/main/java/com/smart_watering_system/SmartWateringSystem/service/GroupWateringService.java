@@ -8,7 +8,6 @@ import com.smart_watering_system.SmartWateringSystem.enums.Action;
 import com.smart_watering_system.SmartWateringSystem.enums.ErrorCode;
 import com.smart_watering_system.SmartWateringSystem.exception.AppException;
 import com.smart_watering_system.SmartWateringSystem.mapper.WateringMapper;
-import com.smart_watering_system.SmartWateringSystem.repository.DeviceWateringHistoryRepository;
 import com.smart_watering_system.SmartWateringSystem.repository.GroupRepository;
 import com.smart_watering_system.SmartWateringSystem.repository.GroupWateringHistoryRepository;
 import jakarta.transaction.Transactional;
@@ -16,17 +15,14 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.Executor;
 
 @Slf4j
@@ -99,6 +95,29 @@ public class GroupWateringService {
         List<GroupWateringHistory> histories = groupWateringHistoryRepository
                 .findAllByGroupOrderByStartTimeDesc(group, Pageable.ofSize(10));
         return histories.stream().map(wateringMapper::toWateringResponse).toList();
+    }
+
+    @Transactional
+    public void runByScheduler(String id, long duration) {
+        Group group = groupRepository.findByIdWithHistories(id);
+
+        group.getDevices().forEach(device -> {
+            executor.execute(() -> {
+                deviceWateringService.runByScheduler(device.getId(), duration, true);
+            });
+        });
+
+        GroupWateringHistory recentWatering = group.getHistories().isEmpty() ? null : group.getHistories().getFirst();
+        boolean isRunning = !Objects.isNull(recentWatering) && LocalDateTime.now().isBefore(recentWatering.getStartTime()
+                .plusSeconds(recentWatering.getDuration()));
+
+        if (!isRunning) {
+            WateringRequest request = new WateringRequest(Action.START, duration);
+
+            GroupWateringHistory history = wateringMapper.toGroupWateringHistory(request);
+            history.setGroup(group);
+            groupWateringHistoryRepository.save(history);
+        }
     }
 
 }

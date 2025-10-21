@@ -4,6 +4,7 @@ import com.smart_watering_system.SmartWateringSystem.dto.request.GroupRequest;
 import com.smart_watering_system.SmartWateringSystem.dto.response.GroupDetailResponse;
 import com.smart_watering_system.SmartWateringSystem.dto.response.GroupResponse;
 import com.smart_watering_system.SmartWateringSystem.entity.Device;
+import com.smart_watering_system.SmartWateringSystem.entity.Group;
 import com.smart_watering_system.SmartWateringSystem.entity.User;
 import com.smart_watering_system.SmartWateringSystem.enums.ErrorCode;
 import com.smart_watering_system.SmartWateringSystem.exception.AppException;
@@ -29,7 +30,8 @@ public class GroupService {
     GroupRepository groupRepository;
     GroupMapper groupMapper;
     DeviceRepository deviceRepository;
-    private final DeviceMapper deviceMapper;
+    DeviceMapper deviceMapper;
+    UserService userService;
 
     public GroupDetailResponse create(GroupRequest request, User user) {
         var group = groupMapper.toGroup(request);
@@ -112,6 +114,11 @@ public class GroupService {
     @Transactional
     public void delete(String id, User user) {
         groupRepository.deleteByIdAndUser(id, user);
+    }
+
+    public Group getByUser(String id, String authHeader) {
+        return groupRepository.findByIdAndUser(id, userService.getUser(authHeader))
+                .orElseThrow(() -> new AppException(ErrorCode.GROUP_NOT_EXISTED));
     }
 
 }
