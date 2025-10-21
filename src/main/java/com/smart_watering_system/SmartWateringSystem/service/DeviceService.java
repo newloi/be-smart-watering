@@ -72,6 +72,8 @@ public class DeviceService {
                 .orElseThrow(() -> new AppException(ErrorCode.DEVICE_NOT_EXISTED));
 
         deviceMapper.updateDevice(device, request);
+        device.setTopicSensor("sensor/" + request.getDeviceId());
+        device.setTopicWatering("watering/" + request.getDeviceId());
 
         return deviceMapper.toDeviceResponse(deviceRepository.save(device));
     }
