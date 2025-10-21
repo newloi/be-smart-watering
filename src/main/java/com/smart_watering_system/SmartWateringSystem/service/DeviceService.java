@@ -67,8 +67,8 @@ public class DeviceService {
         return deviceMapper.toDeviceResponse(deviceRepository.save(device));
     }
 
-    public List<DeviceResponse> getAllFree(User user) {
-        return deviceRepository.findByGroupIsNullAndUser(user).stream().map(deviceMapper::toDeviceResponse).toList();
+    public List<DeviceResponse> getAllFree(User user, Pageable pageable) {
+        return deviceRepository.findByGroupIsNullAndUser(user, pageable).stream().map(deviceMapper::toDeviceResponse).toList();
     }
 
 }

@@ -71,10 +71,11 @@ public class DeviceController {
     }
 
     @GetMapping("/free")
-    ApiResponse<List<DeviceResponse>> getAllFreeDevice(@RequestHeader("Authorization") String headerAuthorizaion) {
+    ApiResponse<List<DeviceResponse>> getAllFreeDevice(@RequestHeader("Authorization") String headerAuthorizaion,
+                                                       Pageable pageable) {
         return ApiResponse.<List<DeviceResponse>>builder()
                 .statusCode(HttpStatus.OK.value())
-                .data(deviceService.getAllFree(userService.getUser(headerAuthorizaion)))
+                .data(deviceService.getAllFree(userService.getUser(headerAuthorizaion), pageable))
                 .build();
     }
 
