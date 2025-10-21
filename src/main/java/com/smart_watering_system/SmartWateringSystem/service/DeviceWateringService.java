@@ -19,7 +19,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.MqttException;
-import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -27,8 +26,6 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
 
 @Slf4j
 @Service
@@ -100,7 +97,7 @@ public class DeviceWateringService {
         return histories.stream().map(wateringMapper::toWateringResponse).toList();
     }
 
-    public void runStartByScheduler(String id, long duration) {
+    public void runByScheduler(String id, long duration, boolean byGroup) {
         Device device = deviceRepository.findByIdWithHistories(id);
         DeviceWateringHistory recentWatering = device.getHistories().isEmpty() ? null : device.getHistories().getFirst();
         boolean isRunning = !Objects.isNull(recentWatering) && LocalDateTime.now().isBefore(recentWatering.getStartTime()
@@ -118,7 +115,7 @@ public class DeviceWateringService {
 
             DeviceWateringHistory history = wateringMapper.toDeviceWateringHistory(request);
             history.setDevice(device);
-            history.setByGroup(false);
+            history.setByGroup(byGroup);
             deviceWateringHistoryRepository.save(history);
         }
     }

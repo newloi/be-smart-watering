@@ -3,20 +3,23 @@ package com.smart_watering_system.SmartWateringSystem.controller;
 import com.smart_watering_system.SmartWateringSystem.dto.request.ScheduleRequest;
 import com.smart_watering_system.SmartWateringSystem.dto.response.ApiResponse;
 import com.smart_watering_system.SmartWateringSystem.dto.response.ScheduleResponse;
-import com.smart_watering_system.SmartWateringSystem.service.SchedulerService;
+import com.smart_watering_system.SmartWateringSystem.service.DeviceSchedulerService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/devices/{id}/schedule")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class ScheduleController {
+public class DeviceScheduleController {
 
-    SchedulerService schedulerService;
+    DeviceSchedulerService deviceSchedulerService;
 
     @PostMapping
     public ApiResponse<ScheduleResponse> createSchedule(@RequestHeader("Authorization") String authHeader,
@@ -24,7 +27,7 @@ public class ScheduleController {
                                                         @PathVariable("id") String id) {
         return ApiResponse.<ScheduleResponse>builder()
                 .statusCode(HttpStatus.OK.value())
-                .data(schedulerService.create(id, request, authHeader))
+                .data(deviceSchedulerService.create(id, request, authHeader))
                 .build();
     }
 
@@ -32,7 +35,7 @@ public class ScheduleController {
     public ApiResponse<Void> deleteSchedule(@RequestHeader("Authorization") String authHeader,
                                             @PathVariable("id") String id,
                                             @PathVariable("scheduleId") String scheduleId) {
-        schedulerService.deleteSchedule(authHeader, id, scheduleId);
+        deviceSchedulerService.deleteSchedule(authHeader, id, scheduleId);
 
         return ApiResponse.<Void>builder()
                 .statusCode(HttpStatus.OK.value())
@@ -46,7 +49,7 @@ public class ScheduleController {
                                                         @PathVariable("scheduleId") String scheduleId) {
         return ApiResponse.<ScheduleResponse>builder()
                 .statusCode(HttpStatus.OK.value())
-                .data(schedulerService.update(authHeader, id, scheduleId, request))
+                .data(deviceSchedulerService.update(authHeader, id, scheduleId, request))
                 .build();
     }
 
@@ -55,10 +58,20 @@ public class ScheduleController {
                                              @RequestBody ScheduleRequest request,
                                              @PathVariable("id") String id,
                                              @PathVariable("scheduleId") String scheduleId) {
-        schedulerService.trigger(authHeader, id, scheduleId, request);
+        deviceSchedulerService.trigger(authHeader, id, scheduleId, request);
 
         return ApiResponse.<Void>builder()
                 .statusCode(HttpStatus.OK.value())
+                .build();
+    }
+
+    @GetMapping
+    public ApiResponse<List<ScheduleResponse>> getAllSchedule(@RequestHeader("Authorization") String authHeader,
+                                                              @PathVariable("id") String id,
+                                                              Pageable pageable) {
+        return ApiResponse.<List<ScheduleResponse>>builder()
+                .statusCode(HttpStatus.OK.value())
+                .data(deviceSchedulerService.getAll(id, authHeader, pageable))
                 .build();
     }
 

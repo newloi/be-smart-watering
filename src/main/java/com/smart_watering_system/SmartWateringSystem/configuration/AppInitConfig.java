@@ -1,8 +1,11 @@
 package com.smart_watering_system.SmartWateringSystem.configuration;
 
 import com.smart_watering_system.SmartWateringSystem.entity.DeviceSchedule;
+import com.smart_watering_system.SmartWateringSystem.entity.GroupSchedule;
 import com.smart_watering_system.SmartWateringSystem.repository.DeviceScheduleRepository;
-import com.smart_watering_system.SmartWateringSystem.service.SchedulerService;
+import com.smart_watering_system.SmartWateringSystem.repository.GroupScheduleRepository;
+import com.smart_watering_system.SmartWateringSystem.service.DeviceSchedulerService;
+import com.smart_watering_system.SmartWateringSystem.service.GroupSchedulerService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -19,10 +22,15 @@ public class AppInitConfig {
 
     @Bean
     ApplicationRunner applicationRunner(DeviceScheduleRepository deviceScheduleRepository,
-                                        SchedulerService schedulerService) {
+                                        DeviceSchedulerService deviceSchedulerService,
+                                        GroupScheduleRepository groupScheduleRepository,
+                                        GroupSchedulerService groupSchedulerService) {
         return args -> {
             List<DeviceSchedule> deviceSchedules = deviceScheduleRepository.findAll();
-            deviceSchedules.forEach(schedulerService::runSchedule);
+            deviceSchedules.forEach(deviceSchedulerService::runSchedule);
+
+            List<GroupSchedule> groupSchedules = groupScheduleRepository.findAll();
+            groupSchedules.forEach(groupSchedulerService::runSchedule);
         };
     }
 
