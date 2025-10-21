@@ -18,6 +18,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -60,7 +61,7 @@ public class SensorService {
         if (device != null) {
             executor.execute(() -> {
                 Optional<DataSensorHistory> latest =
-                        dataSensorHistoryRepository.findTopByDeviceIdOrderByTimestampDesc(device.getId());
+                        dataSensorHistoryRepository.findTopByDeviceOrderByTimestampDesc(device);
                 LocalDateTime preTime = latest.map(DataSensorHistory::getTimestamp).orElse(null);
 
                 if (preTime == null || ChronoUnit.HOURS.between(preTime, now) >= 2)
@@ -70,11 +71,11 @@ public class SensorService {
         }
     }
 
-    public List<DataSensorResponse> getHistory(String id, User user) {
+    public List<DataSensorResponse> getHistory(String id, User user, Pageable pageable) {
         Device device = deviceRepository.findByIdAndUser(id, user)
                 .orElseThrow(() -> new AppException(ErrorCode.DEVICE_NOT_EXISTED));
 
-        List<DataSensorHistory> histories = dataSensorHistoryRepository.findAllByDevice(device);
+        List<DataSensorHistory> histories = dataSensorHistoryRepository.findAllByDeviceOrderByTimestampDesc(device, pageable);
         return histories.stream().map(dataSensorMapper::toDataSensorResponse).toList();
     }
 
