@@ -8,6 +8,7 @@ import com.smart_watering_system.SmartWateringSystem.service.UserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,10 +33,11 @@ public class DeviceController {
     }
 
     @GetMapping
-    ApiResponse<List<DeviceResponse>> getAllDevices(@RequestHeader("Authorization") String headerAuthorizaion){
+    ApiResponse<List<DeviceResponse>> getAllDevices(@RequestHeader("Authorization") String headerAuthorizaion,
+                                                    Pageable pageable) {
         return ApiResponse.<List<DeviceResponse>>builder()
                 .statusCode(HttpStatus.OK.value())
-                .data(deviceService.getAll(userService.getUser(headerAuthorizaion)))
+                .data(deviceService.getAll(userService.getUser(headerAuthorizaion), pageable))
                 .build();
     }
 

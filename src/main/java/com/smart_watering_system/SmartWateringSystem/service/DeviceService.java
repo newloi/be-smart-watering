@@ -13,6 +13,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -42,8 +43,8 @@ public class DeviceService {
         return deviceMapper.toDeviceResponse(device);
     }
 
-    public List<DeviceResponse> getAll(User user) {
-        return deviceRepository.findAllByUser(user).stream()
+    public List<DeviceResponse> getAll(User user, Pageable pageable) {
+        return deviceRepository.findAllByUser(user, pageable).stream()
                 .map(deviceMapper::toDeviceResponse).toList();
     }
 
