@@ -15,6 +15,7 @@ import lombok.experimental.FieldDefaults;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
@@ -47,8 +48,8 @@ public class DeviceService {
         return deviceMapper.toDeviceResponse(device);
     }
 
-    public List<DeviceResponse> getAll(User user) {
-        return deviceRepository.findAllByUser(user).stream()
+    public List<DeviceResponse> getAll(User user, Pageable pageable) {
+        return deviceRepository.findAllByUser(user, pageable).stream()
                 .map(deviceMapper::toDeviceResponse).toList();
     }
 
