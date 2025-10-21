@@ -17,7 +17,7 @@ public interface DeviceRepository extends JpaRepository<Device, String> {
     List<Device> findAllByUser(User user, Pageable pageable);
     Optional<Device> findByIdAndUser(String id, User user);
     void deleteByIdAndUser(String id, User user);
-    List<Device> findByGroupIsNullAndUser(User user);
+    List<Device> findByGroupIsNullAndUser(User user, Pageable pageable);
     Optional<Device> findByDeviceId(String deviceId);
 
     @Query("SELECT d FROM Device d LEFT JOIN FETCH d.histories WHERE d.id = :id")
