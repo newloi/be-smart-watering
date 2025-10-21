@@ -7,8 +7,11 @@ import com.smart_watering_system.SmartWateringSystem.service.GroupSchedulerServi
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/groups/{id}/schedule")
@@ -59,6 +62,16 @@ public class GroupScheduleController {
 
         return ApiResponse.<Void>builder()
                 .statusCode(HttpStatus.OK.value())
+                .build();
+    }
+
+    @GetMapping
+    public ApiResponse<List<ScheduleResponse>> getAllSchedule(@RequestHeader("Authorization") String authHeader,
+                                                              @PathVariable("id") String id,
+                                                              Pageable pageable) {
+        return ApiResponse.<List<ScheduleResponse>>builder()
+                .statusCode(HttpStatus.OK.value())
+                .data(groupSchedulerService.getAll(id, authHeader, pageable))
                 .build();
     }
 

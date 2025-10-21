@@ -12,11 +12,13 @@ import com.smart_watering_system.SmartWateringSystem.repository.DeviceScheduleRe
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 import java.util.stream.Collectors;
@@ -134,6 +136,13 @@ public class DeviceSchedulerService {
 
         if (request.isStatus() && schedule.isStatus()) turnOffSchedule(schedule);
         else if(!request.isStatus() && !schedule.isStatus()) turnOnSchedule(schedule);
+    }
+
+    public List<ScheduleResponse> getAll(String id, String authHeader, Pageable pageable) {
+        var device = deviceService.getByUser(id, authHeader);
+
+        List<DeviceSchedule> schedules = deviceScheduleRepository.findAllByDevice(device, pageable);
+        return schedules.stream().map(scheduleMapper::toScheduleResponse).toList();
     }
 
 }
