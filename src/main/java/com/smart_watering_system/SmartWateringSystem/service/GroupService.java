@@ -17,6 +17,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -60,8 +61,8 @@ public class GroupService {
         return groupDetailResponse;
     }
 
-    public List<GroupResponse> getAll(User user) {
-        var groups = groupRepository.findAllByUser(user);
+    public List<GroupResponse> getAll(User user, Pageable pageable) {
+        var groups = groupRepository.findAllByUser(user, pageable);
         return groups.stream().map(groupMapper::toGroupResponse).toList();
     }
 

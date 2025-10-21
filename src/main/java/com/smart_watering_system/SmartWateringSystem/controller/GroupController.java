@@ -9,6 +9,7 @@ import com.smart_watering_system.SmartWateringSystem.service.UserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,10 +34,11 @@ public class GroupController {
     }
 
     @GetMapping
-    ApiResponse<List<GroupResponse>> getAllGroups(@RequestHeader("Authorization") String headerAuth) {
+    ApiResponse<List<GroupResponse>> getAllGroups(@RequestHeader("Authorization") String headerAuth,
+                                                  Pageable pageable) {
         return ApiResponse.<List<GroupResponse>>builder()
                 .statusCode(HttpStatus.OK.value())
-                .data(groupService.getAll(userService.getUser(headerAuth)))
+                .data(groupService.getAll(userService.getUser(headerAuth), pageable))
                 .build();
     }
 
