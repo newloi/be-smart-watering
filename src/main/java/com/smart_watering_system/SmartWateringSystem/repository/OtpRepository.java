@@ -4,9 +4,12 @@ import com.smart_watering_system.SmartWateringSystem.entity.Otp;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import javax.swing.text.html.Option;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 public interface OtpRepository extends JpaRepository<Otp, String> {
     void deleteByEmail(String email);
     Optional<Otp> findByEmail(String email);
+    List<Otp> findAllByExpiredTimeBefore(LocalDateTime time);
 }
