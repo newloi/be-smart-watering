@@ -11,6 +11,7 @@ import com.smart_watering_system.SmartWateringSystem.repository.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtException;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -34,7 +36,9 @@ public class UserService {
         try {
             user = userRepository.save(user);
         } catch (DataIntegrityViolationException e) {
-            throw new AppException(ErrorCode.USER_EXISTED);
+            String message = e.getRootCause().getMessage();
+            if(message.contains("uk_user_email")) throw new AppException(ErrorCode.EMAIL_USED);
+            else if(message.contains("uk_user_username")) throw new AppException(ErrorCode.USER_EXISTED);
         }
 
         return userMapper.toUserResponse(user);

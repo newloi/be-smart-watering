@@ -12,6 +12,18 @@ spring:
       ddl_auto: update
     show-sql: true
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: luungocloi24052004@gmail.com
+    password: ${SMTP_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+        starttls:
+          enable: true
+
 jwt:
   signerKey: ${SIGNER_KEY}
   valid-duration: 3600
