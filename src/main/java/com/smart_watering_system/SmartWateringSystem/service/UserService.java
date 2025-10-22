@@ -41,7 +41,9 @@ public class UserService {
         try {
             user = userRepository.save(user);
         } catch (DataIntegrityViolationException e) {
-            throw new AppException(ErrorCode.USER_EXISTED);
+            String message = e.getRootCause().getMessage();
+            if(message.contains("uk_user_email")) throw new AppException(ErrorCode.EMAIL_USED);
+            else if(message.contains("uk_user_username")) throw new AppException(ErrorCode.USER_EXISTED);
         }
 
         return userMapper.toUserResponse(user);

@@ -14,6 +14,10 @@ public enum ErrorCode {
             HttpStatus.CONFLICT.value(),
             "User has been existed",
             HttpStatus.CONFLICT
+    ),EMAIL_USED(
+            HttpStatus.CONFLICT.value(),
+            "Email is already in use",
+            HttpStatus.CONFLICT
     ),
     USER_NOT_EXISTED(
             HttpStatus.NOT_FOUND.value(),
@@ -23,6 +27,10 @@ public enum ErrorCode {
     INVALID_PASSWORD(
             HttpStatus.BAD_REQUEST.value(),
             "Password must be at least {min} characters",
+            HttpStatus.BAD_REQUEST
+    ),INVALID_EMAIL(
+            HttpStatus.BAD_REQUEST.value(),
+            "Invalid email",
             HttpStatus.BAD_REQUEST
     ),
     INVALID_USERNAME(
@@ -84,7 +92,12 @@ public enum ErrorCode {
             HttpStatus.NOT_FOUND.value(),
             "Schedule not existed",
             HttpStatus.NOT_FOUND
-    )
+    ),
+    NOT_BLANK(
+            HttpStatus.BAD_REQUEST.value(),
+            "Please send all fields",
+            HttpStatus.BAD_REQUEST
+    ),
 
     ;
 
