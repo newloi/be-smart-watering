@@ -6,14 +6,19 @@ import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.smart_watering_system.SmartWateringSystem.dto.request.LoginRequest;
+import com.smart_watering_system.SmartWateringSystem.dto.request.VerifyRequest;
 import com.smart_watering_system.SmartWateringSystem.dto.response.IntrospectResponse;
 import com.smart_watering_system.SmartWateringSystem.dto.response.LoginResponse;
 import com.smart_watering_system.SmartWateringSystem.entity.InvalidatedToken;
+import com.smart_watering_system.SmartWateringSystem.entity.Otp;
 import com.smart_watering_system.SmartWateringSystem.entity.User;
 import com.smart_watering_system.SmartWateringSystem.enums.ErrorCode;
 import com.smart_watering_system.SmartWateringSystem.exception.AppException;
 import com.smart_watering_system.SmartWateringSystem.repository.InvalidatedTokenRepository;
+import com.smart_watering_system.SmartWateringSystem.repository.OtpRepository;
 import com.smart_watering_system.SmartWateringSystem.repository.UserRepository;
+import jakarta.mail.MessagingException;
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -24,10 +29,13 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.Random;
 import java.util.UUID;
 
 @Slf4j
@@ -50,10 +58,14 @@ public class AuthService {
 
     UserRepository userRepository;
     InvalidatedTokenRepository invalidatedTokenRepository;
+    OtpRepository otpRepository;
+    MailService mailService;
 
     public LoginResponse login(LoginRequest request) {
         var user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        if (!user.isVerified()) throw new AppException(ErrorCode.ACC_NOT_VERIFIED);
 
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         boolean isAuthenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
@@ -109,10 +121,10 @@ public class AuthService {
 
         var isValid = signedJWT.verify(verifier);
 
-        if(!isValid || invalidatedTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID()))
+        if (!isValid || invalidatedTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID()))
             throw new AppException(ErrorCode.INVALID_TOKEN);
 
-        if(!expirationTime.after(new Date()))
+        if (!expirationTime.after(new Date()))
             throw new AppException(ErrorCode.EXPIRED_TOKEN);
 
         return signedJWT;
@@ -123,6 +135,7 @@ public class AuthService {
 
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
                 .subject(user.getUsername())
+                .claim("email", user.getEmail())
                 .issuer("smart-watering")
                 .issueTime(new Date())
                 .expirationTime(new Date(Instant.now().plus(validDuration, ChronoUnit.SECONDS).toEpochMilli()))
@@ -152,6 +165,47 @@ public class AuthService {
                 .build();
 
         invalidatedTokenRepository.save(invalidatedToken);
+    }
+
+    @Transactional
+    public String generateOtp(String email) {
+        String otpCode = String.valueOf(new Random().nextInt(900000) + 100000);
+        LocalDateTime expiredTime = LocalDateTime.now().plusMinutes(5);
+
+        otpRepository.deleteByEmail(email);
+
+        Otp otp = Otp.builder()
+                .email(email)
+                .expiredTime(expiredTime)
+                .build();
+
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
+        otp.setCode(passwordEncoder.encode(otpCode));
+
+        otpRepository.save(otp);
+
+        return otpCode;
+    }
+
+    public void verifyOtp(VerifyRequest request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new AppException(ErrorCode.WRONG_EMAIL));
+
+        Otp otp = otpRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new AppException(ErrorCode.EXPIRED_OTP));
+
+        if(LocalDateTime.now().isAfter(otp.getExpiredTime())) throw new AppException(ErrorCode.EXPIRED_OTP);
+
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
+        boolean isValidOtp = passwordEncoder.matches(request.getCode(), otp.getCode());
+        if(!isValidOtp) throw new AppException(ErrorCode.WRONG_OTP);
+
+        if(!user.isVerified()){
+            user.setVerified(true);
+            userRepository.save(user);
+        }
+
+        otpRepository.delete(otp);
     }
 
 }

@@ -12,4 +12,5 @@ import lombok.Setter;
 public class UserResponse {
     String username;
     String email;
+    boolean isVerified;
 }

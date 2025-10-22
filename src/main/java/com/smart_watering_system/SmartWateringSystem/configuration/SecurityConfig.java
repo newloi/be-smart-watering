@@ -21,7 +21,9 @@ public class SecurityConfig {
             "/auth/log-out",
             "/users",
             "/auth/refresh",
-            "/auth/introspect"
+            "/auth/introspect",
+            "/auth/verify",
+            "/mail/send"
     };
 
     @Autowired

@@ -73,7 +73,31 @@ public enum ErrorCode {
             "Please send all fields",
             HttpStatus.BAD_REQUEST
     ),
-
+    ACC_NOT_VERIFIED(
+            HttpStatus.UNAUTHORIZED.value(),
+            "Account has not been verified",
+            HttpStatus.UNAUTHORIZED
+    ),
+    INVALID_OTP(
+            HttpStatus.BAD_REQUEST.value(),
+            "OTP must be {min} characters",
+    HttpStatus.BAD_REQUEST
+    ),
+    WRONG_OTP(
+            HttpStatus.UNAUTHORIZED.value(),
+            "OTP is wrong",
+            HttpStatus.UNAUTHORIZED
+    ),
+    EXPIRED_OTP(
+            HttpStatus.UNAUTHORIZED.value(),
+            "OTP has expired",
+            HttpStatus.UNAUTHORIZED
+    ),
+    WRONG_EMAIL(
+            HttpStatus.UNAUTHORIZED.value(),
+            "Email is wrong",
+            HttpStatus.UNAUTHORIZED
+    ),
     ;
 
     int statusCode;

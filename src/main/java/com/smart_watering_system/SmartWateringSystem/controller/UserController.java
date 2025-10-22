@@ -5,6 +5,7 @@ import com.smart_watering_system.SmartWateringSystem.dto.response.ApiResponse;
 import com.smart_watering_system.SmartWateringSystem.dto.response.UserResponse;
 import com.smart_watering_system.SmartWateringSystem.mapper.UserMapper;
 import com.smart_watering_system.SmartWateringSystem.service.UserService;
+import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.text.ParseException;
 
 @RestController
@@ -25,7 +27,7 @@ public class UserController {
     private final UserMapper userMapper;
 
     @PostMapping
-    ApiResponse<UserResponse> createUser(@RequestBody @Valid UserRequest request) {
+    ApiResponse<UserResponse> createUser(@RequestBody @Valid UserRequest request) throws MessagingException, IOException {
         return ApiResponse.<UserResponse>builder()
                 .statusCode(HttpStatus.CREATED.value())
                 .data(userService.create(request))

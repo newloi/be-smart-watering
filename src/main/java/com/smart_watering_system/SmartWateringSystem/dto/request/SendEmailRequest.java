@@ -9,10 +9,7 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class DeviceRequest {
+public class SendEmailRequest {
     @NotBlank(message = "NOT_BLANK")
-    String deviceId;
-
-    @NotBlank(message = "NOT_BLANK")
-    String name;
+    String email;
 }

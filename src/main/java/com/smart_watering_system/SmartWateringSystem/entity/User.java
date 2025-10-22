@@ -32,6 +32,8 @@ public class User {
     @Column(name = "email", columnDefinition = "VARCHAR(255) COLLATE utf8mb4_unicode_ci")
     String email;
 
+    boolean verified;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Device> devices;
 
