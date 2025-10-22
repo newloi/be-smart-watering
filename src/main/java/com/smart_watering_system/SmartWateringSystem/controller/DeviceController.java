@@ -5,6 +5,7 @@ import com.smart_watering_system.SmartWateringSystem.dto.response.ApiResponse;
 import com.smart_watering_system.SmartWateringSystem.dto.response.DeviceResponse;
 import com.smart_watering_system.SmartWateringSystem.service.DeviceService;
 import com.smart_watering_system.SmartWateringSystem.service.UserService;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -24,7 +25,7 @@ public class DeviceController {
 
     @PostMapping
     ApiResponse<DeviceResponse> createDevice(@RequestHeader("Authorization") String headerAuthorizaion,
-                                             @RequestBody DeviceRequest request) {
+                                             @RequestBody @Valid DeviceRequest request) {
         return ApiResponse.<DeviceResponse>builder()
                 .statusCode(HttpStatus.CREATED.value())
                 .data(deviceService.create(request, userService.getUser(headerAuthorizaion)))
@@ -61,7 +62,7 @@ public class DeviceController {
     @PutMapping("/{id}")
     ApiResponse<DeviceResponse> updateDevice(@RequestHeader("Authorization") String headerAuthorizaion,
                                              @PathVariable("id") String id,
-                                             @RequestBody DeviceRequest request) {
+                                             @RequestBody @Valid DeviceRequest request) {
         return ApiResponse.<DeviceResponse>builder()
                 .statusCode(HttpStatus.OK.value())
                 .data(deviceService.update(id, request, userService.getUser(headerAuthorizaion)))

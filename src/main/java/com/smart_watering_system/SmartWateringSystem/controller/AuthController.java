@@ -1,6 +1,7 @@
 package com.smart_watering_system.SmartWateringSystem.controller;
 
 import com.nimbusds.jose.JOSEException;
+import com.smart_watering_system.SmartWateringSystem.dto.request.ChangePasswordRequest;
 import com.smart_watering_system.SmartWateringSystem.dto.request.IntrospectRequest;
 import com.smart_watering_system.SmartWateringSystem.dto.request.LoginRequest;
 import com.smart_watering_system.SmartWateringSystem.dto.request.VerifyRequest;
@@ -8,6 +9,7 @@ import com.smart_watering_system.SmartWateringSystem.dto.response.ApiResponse;
 import com.smart_watering_system.SmartWateringSystem.dto.response.IntrospectResponse;
 import com.smart_watering_system.SmartWateringSystem.dto.response.LoginResponse;
 import com.smart_watering_system.SmartWateringSystem.service.AuthService;
+import com.smart_watering_system.SmartWateringSystem.service.TokenService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,7 @@ import java.text.ParseException;
 public class AuthController {
 
     AuthService authService;
+    TokenService tokenService;
 
     @PostMapping("/log-in")
     ApiResponse<LoginResponse> login(@RequestBody @Valid LoginRequest request) {
@@ -36,7 +39,7 @@ public class AuthController {
     }
 
     @PostMapping("/log-out")
-    ApiResponse<Void> logout(@RequestBody IntrospectRequest request) throws ParseException, JOSEException {
+    ApiResponse<Void> logout(@RequestBody @Valid IntrospectRequest request) throws ParseException, JOSEException {
         var token = request.getToken();
         authService.logout(token.startsWith("Bearer ") ? token.substring(7) : token);
 
@@ -46,28 +49,38 @@ public class AuthController {
     }
 
     @PostMapping("/introspect")
-    ApiResponse<IntrospectResponse> introspect(@RequestBody IntrospectRequest request) throws ParseException, JOSEException {
+    ApiResponse<IntrospectResponse> introspect(@RequestBody @Valid IntrospectRequest request) throws ParseException, JOSEException {
         var token = request.getToken();
 
         return ApiResponse.<IntrospectResponse>builder()
                 .statusCode(HttpStatus.OK.value())
-                .data(authService.introspect(token.startsWith("Bearer ") ? token.substring(7) : token))
+                .data(tokenService.introspect(token.startsWith("Bearer ") ? token.substring(7) : token))
                 .build();
     }
 
     @PostMapping("/refresh")
-    ApiResponse<LoginResponse> refreshToken(@RequestBody IntrospectRequest request) throws ParseException, JOSEException {
+    ApiResponse<LoginResponse> refreshToken(@RequestBody @Valid IntrospectRequest request) throws ParseException, JOSEException {
         var token = request.getToken();
 
         return ApiResponse.<LoginResponse>builder()
                 .statusCode(HttpStatus.OK.value())
-                .data(authService.refreshToken(token.startsWith("Bearer ") ? token.substring(7) : token))
+                .data(tokenService.refreshToken(token.startsWith("Bearer ") ? token.substring(7) : token))
                 .build();
     }
 
     @PostMapping("/verify")
-    ApiResponse<Void> verifyOtp(@RequestBody VerifyRequest request) {
-        authService.verifyOtp(request);
+    ApiResponse<Void> verifyOtp(@RequestBody @Valid VerifyRequest request) {
+        tokenService.verifyOtp(request);
+
+        return ApiResponse.<Void>builder()
+                .statusCode(HttpStatus.OK.value())
+                .build();
+    }
+
+    @PostMapping("/change-password")
+    ApiResponse<Void> changePassword(@RequestHeader("Authorization") String authHeader,
+                                     @RequestBody @Valid ChangePasswordRequest request) throws ParseException {
+        authService.changePassword(authHeader, request);
 
         return ApiResponse.<Void>builder()
                 .statusCode(HttpStatus.OK.value())

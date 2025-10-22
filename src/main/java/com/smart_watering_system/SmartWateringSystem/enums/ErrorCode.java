@@ -98,6 +98,11 @@ public enum ErrorCode {
             "Email is wrong",
             HttpStatus.UNAUTHORIZED
     ),
+    PASS_NOT_MATCH(
+            HttpStatus.BAD_REQUEST.value(),
+            "New password and confirm password must match",
+            HttpStatus.BAD_REQUEST
+    ),
     ;
 
     int statusCode;

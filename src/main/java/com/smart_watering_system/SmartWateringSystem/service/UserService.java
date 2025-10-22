@@ -31,7 +31,7 @@ public class UserService {
     UserMapper userMapper;
     PasswordEncoder passwordEncoder;
     MailService mailService;
-    AuthService authService;
+    TokenService tokenService;
 
     public UserResponse create(UserRequest request) throws MessagingException, IOException {
         var user = userMapper.toUser(request);
@@ -47,7 +47,7 @@ public class UserService {
         }
 
         String desEmail = request.getEmail();
-        mailService.sendOtpEmail(desEmail, authService.generateOtp(desEmail));
+        mailService.sendOtpEmail(desEmail, tokenService.generateOtp(desEmail));
         return userMapper.toUserResponse(user);
     }
 
