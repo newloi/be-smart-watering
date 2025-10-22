@@ -11,7 +11,7 @@ COPY src ./src
 RUN mvn package -DskipTests
 
 # Stage 2: create image
-FROM amazoncorretto:21.0.4-jre
+FROM amazoncorretto:21.0.4
 
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
