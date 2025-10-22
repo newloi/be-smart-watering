@@ -6,6 +6,7 @@ import com.smart_watering_system.SmartWateringSystem.dto.response.ApiResponse;
 import com.smart_watering_system.SmartWateringSystem.dto.response.WateringResponse;
 import com.smart_watering_system.SmartWateringSystem.service.DeviceWateringService;
 import com.smart_watering_system.SmartWateringSystem.service.UserService;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -26,7 +27,7 @@ public class DeviceWateringController {
 
     @PostMapping
     ApiResponse<WateringResponse> doAction(@RequestHeader("Authorization") String headerAuth,
-                                           @RequestBody WateringRequest request,
+                                           @RequestBody @Valid WateringRequest request,
                                            @PathVariable("id") String id) throws MqttException, JsonProcessingException {
         return ApiResponse.<WateringResponse>builder()
                 .statusCode(HttpStatus.OK.value())

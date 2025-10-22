@@ -13,5 +13,7 @@ import lombok.experimental.FieldDefaults;
 public class WateringRequest {
     @NotBlank(message = "NOT_BLANK")
     Action action;
+
+    @NotBlank(message = "NOT_BLANK")
     long duration;
 }

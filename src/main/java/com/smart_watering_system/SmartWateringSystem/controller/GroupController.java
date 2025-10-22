@@ -6,6 +6,7 @@ import com.smart_watering_system.SmartWateringSystem.dto.response.GroupDetailRes
 import com.smart_watering_system.SmartWateringSystem.dto.response.GroupResponse;
 import com.smart_watering_system.SmartWateringSystem.service.GroupService;
 import com.smart_watering_system.SmartWateringSystem.service.UserService;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -26,7 +27,7 @@ public class GroupController {
 
     @PostMapping
     ApiResponse<GroupDetailResponse> createGroup(@RequestHeader("Authorization") String headerAuth,
-                                                 @RequestBody GroupRequest request) {
+                                                 @RequestBody @Valid GroupRequest request) {
         return ApiResponse.<GroupDetailResponse>builder()
                 .statusCode(HttpStatus.CREATED.value())
                 .data(groupService.create(request, userService.getUser(headerAuth)))
@@ -54,7 +55,7 @@ public class GroupController {
     @PutMapping("/{id}")
     ApiResponse<GroupDetailResponse> updateGroup(@RequestHeader("Authorization") String headerAuth,
                                                  @PathVariable("id") String id,
-                                                 @RequestBody GroupRequest request) {
+                                                 @RequestBody @Valid GroupRequest request) {
         return ApiResponse.<GroupDetailResponse>builder()
                 .statusCode(HttpStatus.OK.value())
                 .data(groupService.update(id, request, userService.getUser(headerAuth)))

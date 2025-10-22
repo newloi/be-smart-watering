@@ -4,6 +4,7 @@ import com.smart_watering_system.SmartWateringSystem.dto.request.ScheduleRequest
 import com.smart_watering_system.SmartWateringSystem.dto.response.ApiResponse;
 import com.smart_watering_system.SmartWateringSystem.dto.response.ScheduleResponse;
 import com.smart_watering_system.SmartWateringSystem.service.GroupSchedulerService;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -23,7 +24,7 @@ public class GroupScheduleController {
 
     @PostMapping
     public ApiResponse<ScheduleResponse> createSchedule(@RequestHeader("Authorization") String authHeader,
-                                                        @RequestBody ScheduleRequest request,
+                                                        @RequestBody @Valid ScheduleRequest request,
                                                         @PathVariable("id") String id) {
         return ApiResponse.<ScheduleResponse>builder()
                 .statusCode(HttpStatus.OK.value())
@@ -44,7 +45,7 @@ public class GroupScheduleController {
 
     @PutMapping("/{scheduleId}")
     public ApiResponse<ScheduleResponse> updateSchedule(@RequestHeader("Authorization") String authHeader,
-                                                        @RequestBody ScheduleRequest request,
+                                                        @RequestBody @Valid ScheduleRequest request,
                                                         @PathVariable("id") String id,
                                                         @PathVariable("scheduleId") String scheduleId) {
         return ApiResponse.<ScheduleResponse>builder()
@@ -55,7 +56,7 @@ public class GroupScheduleController {
 
     @PostMapping("/{scheduleId}/trigger")
     public ApiResponse<Void> triggerSchedule(@RequestHeader("Authorization") String authHeader,
-                                             @RequestBody ScheduleRequest request,
+                                             @RequestBody @Valid ScheduleRequest request,
                                              @PathVariable("id") String id,
                                              @PathVariable("scheduleId") String scheduleId) {
         groupSchedulerService.trigger(authHeader, id, scheduleId, request);
