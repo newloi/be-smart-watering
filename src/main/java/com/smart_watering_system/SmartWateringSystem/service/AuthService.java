@@ -34,11 +34,11 @@ public class AuthService {
     PasswordEncoder passwordEncoder;
 
     @NonFinal
-    @Value("${jwt.valid-duration}")
+    @Value("${jwt.accessDuration}")
     long accessDuration;
 
     @NonFinal
-    @Value("${jwt.refreshable-duration}")
+    @Value("${jwt.refreshDuration}")
     long refreshDuration;
 
     public LoginResponse login(LoginRequest request) {
@@ -61,10 +61,16 @@ public class AuthService {
             SignedJWT signedAccessToken = tokenService.verifyToken(accessToken);
             SignedJWT signedRefreshToken = tokenService.verifyToken(refreshToken);
 
+            var usernameInAccessToken = signedAccessToken.getJWTClaimsSet().getSubject();
+            var usernameInRefreshToken = signedRefreshToken.getJWTClaimsSet().getSubject();
+
+            if(!Objects.equals(usernameInAccessToken, usernameInRefreshToken))
+                throw new AppException(ErrorCode.INVALID_TOKEN);
+
             tokenService.deleteToken(signedAccessToken);
             tokenService.deleteToken(signedRefreshToken);
         } catch (AppException e) {
-            if(e.getErrorCode() == ErrorCode.INVALID_TOKEN) throw e;
+            if(e.getErrorCode() != ErrorCode.EXPIRED_TOKEN) throw e;
         }
     }
 

@@ -32,6 +32,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.Objects;
 import java.util.Random;
 import java.util.UUID;
 
@@ -50,21 +51,26 @@ public class TokenService {
     String SIGNER_KEY;
 
     @NonFinal
-    @Value("${jwt.signerKeyRefresh}")
-    String SIGNER_KEY_REFRESH;
-
-    @NonFinal
-    @Value("${jwt.valid-duration}")
+    @Value("${jwt.accessDuration}")
     long accessDuration;
 
     public LoginResponse refreshToken(String accessToken, String refreshToken) throws ParseException, JOSEException {
-        var signedAccessToken = verifyToken(accessToken);
-        verifyToken(refreshToken);
+        SignedJWT signedAccessToken = null;
+        try {
+            signedAccessToken = verifyToken(accessToken);
+            deleteToken(signedAccessToken);
+        } catch (AppException e) {
+            if(e.getErrorCode() != ErrorCode.EXPIRED_TOKEN) throw e;
+        }
+        SignedJWT signedRefreshToken = verifyToken(refreshToken);
 
-        deleteToken(signedAccessToken);
+        var usernameInAccessToken = signedAccessToken.getJWTClaimsSet().getSubject();
+        var usernameInRefreshToken = signedRefreshToken.getJWTClaimsSet().getSubject();
 
-        var username = signedAccessToken.getJWTClaimsSet().getSubject();
-        var user = userRepository.findByUsername(username)
+        if(!Objects.equals(usernameInAccessToken, usernameInRefreshToken))
+            throw new AppException(ErrorCode.INVALID_TOKEN);
+
+        var user = userRepository.findByUsername(usernameInRefreshToken)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         return LoginResponse.builder()
