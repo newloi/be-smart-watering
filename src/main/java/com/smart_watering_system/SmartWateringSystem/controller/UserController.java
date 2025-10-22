@@ -35,7 +35,7 @@ public class UserController {
     }
 
     @GetMapping
-    ApiResponse<UserResponse> getUser(@RequestHeader("Authorization") String headerAuthorization) throws ParseException {
+    ApiResponse<UserResponse> getUser(@RequestHeader("Authorization") String headerAuthorization) {
         return ApiResponse.<UserResponse>builder()
                 .data(userMapper.toUserResponse(userService.getUser(headerAuthorization)))
                 .build();

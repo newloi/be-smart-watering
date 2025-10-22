@@ -1,9 +1,12 @@
 package com.smart_watering_system.SmartWateringSystem.configuration;
 
 import com.nimbusds.jose.JOSEException;
+import com.smart_watering_system.SmartWateringSystem.service.TokenService;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
 import com.smart_watering_system.SmartWateringSystem.exception.AppException;
-import com.smart_watering_system.SmartWateringSystem.service.AuthService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -17,18 +20,20 @@ import javax.crypto.spec.SecretKeySpec;
 import java.text.ParseException;
 
 @Component
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CustomJwtDecoder implements JwtDecoder {
 
+    @NonFinal
     @Value("${jwt.signerKey}")
-    private String SIGNER_KEY;
+    String SIGNER_KEY;
 
-    @Autowired
-    private AuthService authService;
+    TokenService tokenService;
 
     @Override
     public Jwt decode(String token) throws JwtException {
         try {
-            authService.introspect(token);
+            tokenService.introspect(token);
         } catch (AppException exception) {
             throw new InvalidBearerTokenException(exception.getErrorCode().name(), exception);
         } catch (ParseException | JOSEException ignored) {}

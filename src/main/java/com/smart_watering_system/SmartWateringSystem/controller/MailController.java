@@ -4,7 +4,9 @@ import com.smart_watering_system.SmartWateringSystem.dto.request.SendEmailReques
 import com.smart_watering_system.SmartWateringSystem.dto.response.ApiResponse;
 import com.smart_watering_system.SmartWateringSystem.service.AuthService;
 import com.smart_watering_system.SmartWateringSystem.service.MailService;
+import com.smart_watering_system.SmartWateringSystem.service.TokenService;
 import jakarta.mail.MessagingException;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -23,12 +25,12 @@ import java.io.IOException;
 public class MailController {
 
     MailService mailService;
-    AuthService authService;
+    TokenService tokenService;
 
     @PostMapping("/send")
-    ApiResponse<Void> sendOtpMail(@RequestBody SendEmailRequest request) throws MessagingException, IOException {
+    ApiResponse<Void> sendOtpMail(@RequestBody @Valid SendEmailRequest request) throws MessagingException, IOException {
         String desEmail = request.getEmail();
-        mailService.sendOtpEmail(desEmail, authService.generateOtp(desEmail));
+        mailService.sendOtpEmail(desEmail, tokenService.generateOtp(desEmail));
 
         return ApiResponse.<Void>builder()
                 .statusCode(HttpStatus.OK.value())
