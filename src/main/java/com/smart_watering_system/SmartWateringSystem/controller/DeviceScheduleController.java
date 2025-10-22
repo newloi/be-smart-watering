@@ -1,6 +1,7 @@
 package com.smart_watering_system.SmartWateringSystem.controller;
 
 import com.smart_watering_system.SmartWateringSystem.dto.request.ScheduleRequest;
+import com.smart_watering_system.SmartWateringSystem.dto.request.TriggerRequest;
 import com.smart_watering_system.SmartWateringSystem.dto.response.ApiResponse;
 import com.smart_watering_system.SmartWateringSystem.dto.response.ScheduleResponse;
 import com.smart_watering_system.SmartWateringSystem.service.DeviceSchedulerService;
@@ -56,7 +57,7 @@ public class DeviceScheduleController {
 
     @PostMapping("/{scheduleId}/trigger")
     public ApiResponse<Void> triggerSchedule(@RequestHeader("Authorization") String authHeader,
-                                             @RequestBody @Valid ScheduleRequest request,
+                                             @RequestBody @Valid TriggerRequest request,
                                              @PathVariable("id") String id,
                                              @PathVariable("scheduleId") String scheduleId) {
         deviceSchedulerService.trigger(authHeader, id, scheduleId, request);

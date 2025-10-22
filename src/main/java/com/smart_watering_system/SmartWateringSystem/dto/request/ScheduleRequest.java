@@ -14,7 +14,7 @@ import java.util.List;
 @Setter
 @Builder
 @AllArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class ScheduleRequest {
     @NotBlank(message = "NOT_BLANK")
     LocalTime startTime;
@@ -26,5 +26,4 @@ public class ScheduleRequest {
     Repeat repeatType;
 
     List<Day> daysOfWeek;
-    boolean status;
 }

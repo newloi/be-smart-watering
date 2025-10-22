@@ -1,6 +1,7 @@
 package com.smart_watering_system.SmartWateringSystem.service;
 
 import com.smart_watering_system.SmartWateringSystem.dto.request.ScheduleRequest;
+import com.smart_watering_system.SmartWateringSystem.dto.request.TriggerRequest;
 import com.smart_watering_system.SmartWateringSystem.dto.response.ScheduleResponse;
 import com.smart_watering_system.SmartWateringSystem.entity.GroupSchedule;
 import com.smart_watering_system.SmartWateringSystem.enums.Day;
@@ -129,7 +130,7 @@ public class GroupSchedulerService {
         return scheduleMapper.toScheduleResponse(schedule);
     }
 
-    public void trigger(String authHeader, String id, String scheduleId, ScheduleRequest request) {
+    public void trigger(String authHeader, String id, String scheduleId, TriggerRequest request) {
         var group = groupService.getByUser(id, authHeader);
         var schedule = groupScheduleRepository.findByIdAndGroup(scheduleId, group)
                 .orElseThrow(() -> new AppException(ErrorCode.SCHEDULE_NOT_EXISTED));
