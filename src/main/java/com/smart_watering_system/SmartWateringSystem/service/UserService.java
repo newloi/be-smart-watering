@@ -10,6 +10,7 @@ import com.smart_watering_system.SmartWateringSystem.exception.AppException;
 import com.smart_watering_system.SmartWateringSystem.mapper.UserMapper;
 import com.smart_watering_system.SmartWateringSystem.repository.InvalidatedTokenRepository;
 import com.smart_watering_system.SmartWateringSystem.repository.UserRepository;
+import jakarta.mail.MessagingException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -20,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
@@ -33,10 +35,13 @@ public class UserService {
     UserRepository userRepository;
     UserMapper userMapper;
     PasswordEncoder passwordEncoder;
+    MailService mailService;
+    AuthService authService;
 
-    public UserResponse create(UserRequest request) {
+    public UserResponse create(UserRequest request) throws MessagingException, IOException {
         var user = userMapper.toUser(request);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setVerified(false);
 
         try {
             user = userRepository.save(user);
@@ -46,6 +51,8 @@ public class UserService {
             else if(message.contains("uk_user_username")) throw new AppException(ErrorCode.USER_EXISTED);
         }
 
+        String desEmail = request.getEmail();
+        mailService.sendOtpEmail(desEmail, authService.generateOtp(desEmail));
         return userMapper.toUserResponse(user);
     }
 

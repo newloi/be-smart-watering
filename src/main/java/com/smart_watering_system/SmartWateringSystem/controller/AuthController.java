@@ -3,6 +3,7 @@ package com.smart_watering_system.SmartWateringSystem.controller;
 import com.nimbusds.jose.JOSEException;
 import com.smart_watering_system.SmartWateringSystem.dto.request.IntrospectRequest;
 import com.smart_watering_system.SmartWateringSystem.dto.request.LoginRequest;
+import com.smart_watering_system.SmartWateringSystem.dto.request.VerifyRequest;
 import com.smart_watering_system.SmartWateringSystem.dto.response.ApiResponse;
 import com.smart_watering_system.SmartWateringSystem.dto.response.IntrospectResponse;
 import com.smart_watering_system.SmartWateringSystem.dto.response.LoginResponse;
@@ -61,6 +62,15 @@ public class AuthController {
         return ApiResponse.<LoginResponse>builder()
                 .statusCode(HttpStatus.OK.value())
                 .data(authService.refreshToken(token.startsWith("Bearer ") ? token.substring(7) : token))
+                .build();
+    }
+
+    @PostMapping("/verify")
+    ApiResponse<Void> verifyOtp(@RequestBody VerifyRequest request) {
+        authService.verifyOtp(request);
+
+        return ApiResponse.<Void>builder()
+                .statusCode(HttpStatus.OK.value())
                 .build();
     }
 

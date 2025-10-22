@@ -7,6 +7,8 @@ import jakarta.persistence.Id;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @Setter
@@ -18,4 +20,7 @@ public class Otp {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
+    String email;
+    String code;
+    LocalDateTime expiredTime;
 }
