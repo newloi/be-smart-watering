@@ -10,6 +10,8 @@ import com.smart_watering_system.SmartWateringSystem.dto.response.IntrospectResp
 import com.smart_watering_system.SmartWateringSystem.dto.response.LoginResponse;
 import com.smart_watering_system.SmartWateringSystem.service.AuthService;
 import com.smart_watering_system.SmartWateringSystem.service.TokenService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -31,17 +33,28 @@ public class AuthController {
     TokenService tokenService;
 
     @PostMapping("/log-in")
-    ApiResponse<LoginResponse> login(@RequestBody @Valid LoginRequest request) {
+    ApiResponse<LoginResponse> login(@RequestBody LoginRequest request, HttpServletResponse response) {
+        LoginResponse loginResponse = authService.login(request);
+
+        Cookie cookie = new Cookie("refreshToken", loginResponse.getRefreshToken());
+        cookie.setHttpOnly(true);
+        cookie.setSecure(false);
+        cookie.setPath("/auth");
+        cookie.setMaxAge(7 * 24 * 60 * 60);
+
+        response.addCookie(cookie);
+
         return ApiResponse.<LoginResponse>builder()
                 .statusCode(HttpStatus.OK.value())
-                .data(authService.login(request))
+                .data(loginResponse)
                 .build();
     }
 
     @PostMapping("/log-out")
-    ApiResponse<Void> logout(@RequestBody @Valid IntrospectRequest request) throws ParseException, JOSEException {
-        var token = request.getToken();
-        authService.logout(token.startsWith("Bearer ") ? token.substring(7) : token);
+    ApiResponse<Void> logout(@CookieValue(name = "refreshToken") String refreshToken,
+                             @RequestBody @Valid IntrospectRequest request) throws ParseException, JOSEException {
+        var accessToken = request.getToken();
+        authService.logout(accessToken, refreshToken);
 
         return ApiResponse.<Void>builder()
                 .statusCode(HttpStatus.OK.value())
@@ -49,22 +62,25 @@ public class AuthController {
     }
 
     @PostMapping("/introspect")
-    ApiResponse<IntrospectResponse> introspect(@RequestBody @Valid IntrospectRequest request) throws ParseException, JOSEException {
+    ApiResponse<IntrospectResponse> introspect(@RequestBody @Valid IntrospectRequest request)
+            throws ParseException, JOSEException {
         var token = request.getToken();
 
         return ApiResponse.<IntrospectResponse>builder()
                 .statusCode(HttpStatus.OK.value())
-                .data(tokenService.introspect(token.startsWith("Bearer ") ? token.substring(7) : token))
+                .data(tokenService.introspect(token))
                 .build();
     }
 
     @PostMapping("/refresh")
-    ApiResponse<LoginResponse> refreshToken(@RequestBody @Valid IntrospectRequest request) throws ParseException, JOSEException {
-        var token = request.getToken();
+    ApiResponse<LoginResponse> refreshToken(@CookieValue(name = "refreshToken") String refreshToken,
+                                            @RequestBody @Valid IntrospectRequest request)
+            throws ParseException, JOSEException {
+        var accessToken = request.getToken();
 
         return ApiResponse.<LoginResponse>builder()
                 .statusCode(HttpStatus.OK.value())
-                .data(tokenService.refreshToken(token.startsWith("Bearer ") ? token.substring(7) : token))
+                .data(tokenService.refreshToken(accessToken, refreshToken))
                 .build();
     }
 

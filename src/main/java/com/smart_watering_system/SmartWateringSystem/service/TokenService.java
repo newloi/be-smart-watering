@@ -50,43 +50,41 @@ public class TokenService {
     String SIGNER_KEY;
 
     @NonFinal
-    @Value("${jwt.valid-duration}")
-    long validDuration;
+    @Value("${jwt.signerKeyRefresh}")
+    String SIGNER_KEY_REFRESH;
 
     @NonFinal
-    @Value("${jwt.refreshable-duration}")
-    long refreshableDuration;
+    @Value("${jwt.valid-duration}")
+    long accessDuration;
 
-    public LoginResponse refreshToken(String token) throws ParseException, JOSEException {
-        var signedToken = verifyToken(token, true);
+    public LoginResponse refreshToken(String accessToken, String refreshToken) throws ParseException, JOSEException {
+        var signedAccessToken = verifyToken(accessToken);
+        verifyToken(refreshToken);
 
-        deleteToken(signedToken);
+        deleteToken(signedAccessToken);
 
-        var username = signedToken.getJWTClaimsSet().getSubject();
+        var username = signedAccessToken.getJWTClaimsSet().getSubject();
         var user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         return LoginResponse.builder()
-                .token(generateToken(user))
+                .accessToken(generateToken(user, accessDuration))
                 .build();
     }
 
     public IntrospectResponse introspect(String token) throws ParseException, JOSEException {
-        verifyToken(token, false);
+        verifyToken(token);
 
         return IntrospectResponse.builder()
                 .isAuthenticate(true)
                 .build();
     }
 
-    SignedJWT verifyToken(String token, boolean isRefresh) throws JOSEException, ParseException {
+    SignedJWT verifyToken(String token) throws JOSEException, ParseException {
         JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
 
         SignedJWT signedJWT = SignedJWT.parse(token);
-        Date expirationTime = (isRefresh)
-                ? new Date(signedJWT.getJWTClaimsSet().getIssueTime().toInstant()
-                .plus(refreshableDuration, ChronoUnit.SECONDS).toEpochMilli())
-                : signedJWT.getJWTClaimsSet().getExpirationTime();
+        Date expirationTime = signedJWT.getJWTClaimsSet().getExpirationTime();
 
         var isValid = signedJWT.verify(verifier);
 
@@ -99,7 +97,7 @@ public class TokenService {
         return signedJWT;
     }
 
-    String generateToken(User user) {
+    public String generateToken(User user, long duration) {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
 
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
@@ -107,7 +105,7 @@ public class TokenService {
                 .claim("email", user.getEmail())
                 .issuer("smart-watering")
                 .issueTime(new Date())
-                .expirationTime(new Date(Instant.now().plus(validDuration, ChronoUnit.SECONDS).toEpochMilli()))
+                .expirationTime(new Date(Instant.now().plus(duration, ChronoUnit.SECONDS).toEpochMilli()))
                 .jwtID(UUID.randomUUID().toString())
                 .build();
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
@@ -125,8 +123,7 @@ public class TokenService {
 
     void deleteToken(SignedJWT signedToken) throws ParseException {
         String jit = signedToken.getJWTClaimsSet().getJWTID();
-        Date expiryTime = new Date(signedToken.getJWTClaimsSet().getIssueTime().toInstant()
-                .plus(refreshableDuration, ChronoUnit.SECONDS).toEpochMilli());
+        Date expiryTime = signedToken.getJWTClaimsSet().getExpirationTime();
 
         InvalidatedToken invalidatedToken = InvalidatedToken.builder()
                 .id(jit)

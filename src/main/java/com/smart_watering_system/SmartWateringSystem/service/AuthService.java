@@ -13,8 +13,9 @@ import com.smart_watering_system.SmartWateringSystem.repository.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +33,14 @@ public class AuthService {
     TokenService tokenService;
     PasswordEncoder passwordEncoder;
 
+    @NonFinal
+    @Value("${jwt.valid-duration}")
+    long accessDuration;
+
+    @NonFinal
+    @Value("${jwt.refreshable-duration}")
+    long refreshDuration;
+
     public LoginResponse login(LoginRequest request) {
         var user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
@@ -42,20 +51,21 @@ public class AuthService {
         if (!isAuthenticated) throw new AppException(ErrorCode.WRONG_PASSWORD);
 
         return LoginResponse.builder()
-                .token(tokenService.generateToken(user))
+                .accessToken(tokenService.generateToken(user, accessDuration))
+                .refreshToken(tokenService.generateToken(user, refreshDuration))
                 .build();
     }
 
-    public void logout(String token) throws JOSEException, ParseException {
-        SignedJWT signedToken = null;
-
+    public void logout(String accessToken, String refreshToken) throws JOSEException, ParseException {
         try {
-            signedToken = tokenService.verifyToken(token, true);
-        } catch (AppException e) {
-            log.info("log outed by exception");
-        }
+            SignedJWT signedAccessToken = tokenService.verifyToken(accessToken);
+            SignedJWT signedRefreshToken = tokenService.verifyToken(refreshToken);
 
-        tokenService.deleteToken(signedToken);
+            tokenService.deleteToken(signedAccessToken);
+            tokenService.deleteToken(signedRefreshToken);
+        } catch (AppException e) {
+            if(e.getErrorCode() == ErrorCode.INVALID_TOKEN) throw e;
+        }
     }
 
     public void changePassword(String authHeader, ChangePasswordRequest request) throws ParseException {
