@@ -54,23 +54,12 @@ public class TokenService {
     @Value("${jwt.accessDuration}")
     long accessDuration;
 
-    public LoginResponse refreshToken(String accessToken, String refreshToken) throws ParseException, JOSEException {
-        SignedJWT signedAccessToken = null;
-        try {
-            signedAccessToken = verifyToken(accessToken);
-            deleteToken(signedAccessToken);
-        } catch (AppException e) {
-            if(e.getErrorCode() != ErrorCode.EXPIRED_TOKEN) throw e;
-        }
+    public LoginResponse refreshToken(String refreshToken) throws ParseException, JOSEException {
         SignedJWT signedRefreshToken = verifyToken(refreshToken);
 
-        var usernameInAccessToken = signedAccessToken.getJWTClaimsSet().getSubject();
-        var usernameInRefreshToken = signedRefreshToken.getJWTClaimsSet().getSubject();
+        var username = signedRefreshToken.getJWTClaimsSet().getSubject();
 
-        if(!Objects.equals(usernameInAccessToken, usernameInRefreshToken))
-            throw new AppException(ErrorCode.INVALID_TOKEN);
-
-        var user = userRepository.findByUsername(usernameInRefreshToken)
+        var user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         return LoginResponse.builder()

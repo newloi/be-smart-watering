@@ -56,22 +56,9 @@ public class AuthService {
                 .build();
     }
 
-    public void logout(String accessToken, String refreshToken) throws JOSEException, ParseException {
-        try {
-            SignedJWT signedAccessToken = tokenService.verifyToken(accessToken);
-            SignedJWT signedRefreshToken = tokenService.verifyToken(refreshToken);
-
-            var usernameInAccessToken = signedAccessToken.getJWTClaimsSet().getSubject();
-            var usernameInRefreshToken = signedRefreshToken.getJWTClaimsSet().getSubject();
-
-            if(!Objects.equals(usernameInAccessToken, usernameInRefreshToken))
-                throw new AppException(ErrorCode.INVALID_TOKEN);
-
-            tokenService.deleteToken(signedAccessToken);
-            tokenService.deleteToken(signedRefreshToken);
-        } catch (AppException e) {
-            if(e.getErrorCode() != ErrorCode.EXPIRED_TOKEN) throw e;
-        }
+    public void logout(String refreshToken) throws JOSEException, ParseException {
+        SignedJWT signedJWT = tokenService.verifyToken(refreshToken);
+        tokenService.deleteToken(signedJWT);
     }
 
     public void changePassword(String authHeader, ChangePasswordRequest request) throws ParseException {
