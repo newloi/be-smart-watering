@@ -51,7 +51,6 @@ public class SensorService {
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         DataSensorHistory dataSensorHistory = objectMapper.readValue(payload, DataSensorHistory.class);
-        dataSensorHistory.setTimestamp(now);
         dataSensorHistory.setDevice(device);
 
         String message = objectMapper.writeValueAsString(dataSensorMapper.toDataSensorResponse(dataSensorHistory));

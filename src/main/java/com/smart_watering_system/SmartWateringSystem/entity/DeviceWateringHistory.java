@@ -3,6 +3,8 @@ package com.smart_watering_system.SmartWateringSystem.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
@@ -12,12 +14,16 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@EntityListeners(AuditingEntityListener.class)
 public class DeviceWateringHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
     boolean byGroup;
     long duration;
+
+    @CreatedDate
+    @Column(nullable = false, updatable = false)
     LocalDateTime startTime;
 
     @ManyToOne(fetch = FetchType.LAZY)

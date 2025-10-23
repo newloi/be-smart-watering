@@ -10,6 +10,8 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -70,7 +72,8 @@ public class GroupScheduleController {
     @GetMapping
     public ApiResponse<List<ScheduleResponse>> getAllSchedule(@RequestHeader("Authorization") String authHeader,
                                                               @PathVariable("id") String id,
-                                                              Pageable pageable) {
+                                                              @PageableDefault(sort = "createdAt",
+                                                                      direction = Sort.Direction.DESC) Pageable pageable) {
         return ApiResponse.<List<ScheduleResponse>>builder()
                 .statusCode(HttpStatus.OK.value())
                 .data(groupSchedulerService.getAll(id, authHeader, pageable))

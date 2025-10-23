@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Pageable;
 import org.eclipse.paho.client.mqttv3.MqttException;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,7 +38,8 @@ public class DeviceController {
 
     @GetMapping
     ApiResponse<List<DeviceResponse>> getAllDevices(@RequestHeader("Authorization") String headerAuthorizaion,
-                                                    Pageable pageable) {
+                                                    @PageableDefault(sort = "createdAt",
+                                                            direction = Sort.Direction.DESC) Pageable pageable) {
         return ApiResponse.<List<DeviceResponse>>builder()
                 .statusCode(HttpStatus.OK.value())
                 .data(deviceService.getAll(userService.getUser(headerAuthorizaion), pageable))
@@ -74,7 +77,8 @@ public class DeviceController {
 
     @GetMapping("/free")
     ApiResponse<List<DeviceResponse>> getAllFreeDevice(@RequestHeader("Authorization") String headerAuthorizaion,
-                                                       Pageable pageable) {
+                                                       @PageableDefault(sort = "createdAt",
+                                                               direction = Sort.Direction.DESC) Pageable pageable) {
         return ApiResponse.<List<DeviceResponse>>builder()
                 .statusCode(HttpStatus.OK.value())
                 .data(deviceService.getAllFree(userService.getUser(headerAuthorizaion), pageable))

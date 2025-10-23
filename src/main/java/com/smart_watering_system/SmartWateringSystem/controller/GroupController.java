@@ -11,6 +11,8 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,7 +38,8 @@ public class GroupController {
 
     @GetMapping
     ApiResponse<List<GroupResponse>> getAllGroups(@RequestHeader("Authorization") String headerAuth,
-                                                  Pageable pageable) {
+                                                  @PageableDefault(sort = "createdAt",
+                                                          direction = Sort.Direction.DESC) Pageable pageable) {
         return ApiResponse.<List<GroupResponse>>builder()
                 .statusCode(HttpStatus.OK.value())
                 .data(groupService.getAll(userService.getUser(headerAuth), pageable))

@@ -3,7 +3,11 @@ package com.smart_watering_system.SmartWateringSystem.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -19,12 +23,21 @@ import java.util.List;
                 @UniqueConstraint(columnNames = {"name", "user_id"})
         }
 )
+@EntityListeners(AuditingEntityListener.class)
 public class Group {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
     String name;
     boolean isWatering;
+
+    @CreatedDate
+    @Column(nullable = false, updatable = false)
+    LocalDateTime createdAt;
+
+    @LastModifiedDate
+    @Column(nullable = false)
+    LocalDateTime updatedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")

@@ -15,11 +15,8 @@ public interface WateringMapper{
     @Mapping(target = "byGroup", constant = "true")
     WateringResponse toWateringResponse(GroupWateringHistory history);
 
-    @Mapping(target = "byGroup", constant = "false")
-    @Mapping(target = "startTime", expression = "java(java.time.LocalDateTime.now())")
     DeviceWateringHistory toDeviceWateringHistory(WateringRequest request);
 
-    @Mapping(target = "startTime", expression = "java(java.time.LocalDateTime.now())")
     GroupWateringHistory toGroupWateringHistory(WateringRequest request);
 
 }

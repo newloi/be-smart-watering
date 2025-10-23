@@ -3,6 +3,8 @@ package com.smart_watering_system.SmartWateringSystem.dto.response;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @Builder
@@ -14,4 +16,6 @@ public class DeviceResponse {
     String name;
     String topicSensor;
     String topicWatering;
+    LocalDateTime createdAt;
+    LocalDateTime updatedAt;
 }
