@@ -21,6 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
+import java.util.Objects;
 
 @Slf4j
 @RestController
@@ -51,10 +52,10 @@ public class AuthController {
     }
 
     @PostMapping("/log-out")
-    ApiResponse<Void> logout(@CookieValue(name = "refreshToken") String refreshToken,
+    ApiResponse<Void> logout(@CookieValue(name = "refreshToken", required = false) String refreshToken,
                              @RequestBody @Valid IntrospectRequest request) throws ParseException, JOSEException {
-        var accessToken = request.getToken();
-        authService.logout(accessToken, refreshToken);
+        var accessToken = request.getAccessToken();
+        authService.logout(accessToken, Objects.isNull(refreshToken) ? request.getRefreshToken() : refreshToken);
 
         return ApiResponse.<Void>builder()
                 .statusCode(HttpStatus.OK.value())
@@ -64,7 +65,7 @@ public class AuthController {
     @PostMapping("/introspect")
     ApiResponse<IntrospectResponse> introspect(@RequestBody @Valid IntrospectRequest request)
             throws ParseException, JOSEException {
-        var token = request.getToken();
+        var token = request.getAccessToken();
 
         return ApiResponse.<IntrospectResponse>builder()
                 .statusCode(HttpStatus.OK.value())
@@ -73,14 +74,14 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    ApiResponse<LoginResponse> refreshToken(@CookieValue(name = "refreshToken") String refreshToken,
+    ApiResponse<LoginResponse> refreshToken(@CookieValue(name = "refreshToken", required = false) String refreshToken,
                                             @RequestBody @Valid IntrospectRequest request)
             throws ParseException, JOSEException {
-        var accessToken = request.getToken();
+        var accessToken = request.getAccessToken();
 
         return ApiResponse.<LoginResponse>builder()
                 .statusCode(HttpStatus.OK.value())
-                .data(tokenService.refreshToken(accessToken, refreshToken))
+                .data(tokenService.refreshToken(accessToken, Objects.isNull(refreshToken) ? request.getRefreshToken() : refreshToken))
                 .build();
     }
 
