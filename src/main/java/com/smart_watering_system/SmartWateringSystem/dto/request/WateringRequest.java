@@ -12,7 +12,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class WateringRequest {
-    @NotBlank(message = "NOT_BLANK")
+    @NotNull(message = "NOT_BLANK")
     Action action;
 
     @NotNull(message = "NOT_BLANK")
