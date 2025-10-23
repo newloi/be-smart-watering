@@ -2,6 +2,7 @@ package com.smart_watering_system.SmartWateringSystem.dto.request;
 
 import com.smart_watering_system.SmartWateringSystem.entity.Device;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -16,6 +17,6 @@ public class GroupRequest {
     @NotBlank(message = "NOT_BLANK")
     String name;
 
-    @NotBlank(message = "NOT_BLANK")
+    @NotNull(message = "NOT_BLANK")
     List<String> devices;
 }

@@ -1,6 +1,7 @@
 package com.smart_watering_system.SmartWateringSystem.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -10,6 +11,6 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class TriggerRequest {
-    @NotBlank(message = "NOT_BLANK")
+    @NotNull(message = "NOT_BLANK")
     boolean status;
 }
