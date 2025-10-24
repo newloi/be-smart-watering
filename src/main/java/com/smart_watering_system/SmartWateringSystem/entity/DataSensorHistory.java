@@ -22,8 +22,6 @@ public class DataSensorHistory {
     float air;
     float soil;
 
-    @CreatedDate
-    @Column(nullable = false, updatable = false)
     LocalDateTime timestamp;
 
     @ManyToOne(fetch = FetchType.LAZY)

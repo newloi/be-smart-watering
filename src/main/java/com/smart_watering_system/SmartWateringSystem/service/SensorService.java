@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 
@@ -42,31 +43,37 @@ public class SensorService {
 
     public void sendData(String topic, String payload) throws JsonProcessingException {
         String[] spliter = topic.split("/");
-        String deviceId = spliter[1];
-        Device device = deviceRepository.findByDeviceId(deviceId)
-                .orElse(null);
 
-        LocalDateTime now = LocalDateTime.now();
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        DataSensorHistory dataSensorHistory = objectMapper.readValue(payload, DataSensorHistory.class);
-        dataSensorHistory.setDevice(device);
+        if(Objects.equals(spliter[0], "watering")) {
+            simpMessagingTemplate.convertAndSend("/device/" + topic, payload);
+        } else if(Objects.equals(spliter[0], "sensor")) {
+            String deviceId = spliter[1];
+            Device device = deviceRepository.findByDeviceId(deviceId)
+                    .orElse(null);
 
-        String message = objectMapper.writeValueAsString(dataSensorMapper.toDataSensorResponse(dataSensorHistory));
-        log.info("Topic: " + topic + ", Data: " + message);
-        simpMessagingTemplate.convertAndSend("/device/" + topic, message);
+            LocalDateTime now = LocalDateTime.now();
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.registerModule(new JavaTimeModule());
+            objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+            DataSensorHistory dataSensorHistory = objectMapper.readValue(payload, DataSensorHistory.class);
+            dataSensorHistory.setTimestamp(now);
+            dataSensorHistory.setDevice(device);
 
-        if (device != null) {
-            executor.execute(() -> {
-                Optional<DataSensorHistory> latest =
-                        dataSensorHistoryRepository.findTopByDeviceOrderByTimestampDesc(device);
-                LocalDateTime preTime = latest.map(DataSensorHistory::getTimestamp).orElse(null);
+            String message = objectMapper.writeValueAsString(dataSensorMapper.toDataSensorResponse(dataSensorHistory));
+            log.info("Topic: " + topic + ", Data: " + message);
+            simpMessagingTemplate.convertAndSend("/device/" + topic, message);
 
-                if (preTime == null || ChronoUnit.HOURS.between(preTime, now) >= 2)
-                    dataSensorHistoryRepository.save(dataSensorHistory);
+            if (device != null) {
+                executor.execute(() -> {
+                    Optional<DataSensorHistory> latest =
+                            dataSensorHistoryRepository.findTopByDeviceOrderByTimestampDesc(device);
+                    LocalDateTime preTime = latest.map(DataSensorHistory::getTimestamp).orElse(null);
 
-            });
+                    if (preTime == null || ChronoUnit.HOURS.between(preTime, now) >= 2)
+                        dataSensorHistoryRepository.save(dataSensorHistory);
+
+                });
+            }
         }
     }
 
