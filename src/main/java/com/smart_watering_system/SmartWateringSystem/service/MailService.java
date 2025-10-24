@@ -1,22 +1,26 @@
 package com.smart_watering_system.SmartWateringSystem.service;
 
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
+import com.sendgrid.Method;
+import com.sendgrid.Request;
+import com.sendgrid.Response;
+import com.sendgrid.SendGrid;
+import com.sendgrid.helpers.mail.Mail;
+import com.sendgrid.helpers.mail.objects.Content;
+import com.sendgrid.helpers.mail.objects.Email;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import java.io.IOException;
-import java.nio.file.Files;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -26,23 +30,33 @@ public class MailService {
     @Value("${spring.mail.username}")
     String srcEmail;
 
-    JavaMailSender mailSender;
+    @NonFinal
+    @Value("${sendgrid.api-key}")
+    String sendGridApiKey;
+
     SpringTemplateEngine templateEngine;
 
-    public void sendOtpEmail(String desEmail, String otpCode) throws MessagingException {
+    @Async
+    public void sendOtpEmailAsync(String desEmail, String otpCode) throws IOException {
         Context context = new Context();
         context.setVariable("otpCode", otpCode);
 
         String htmlContent = templateEngine.process("otp-template", context);
 
-        MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, "UTF-8");
-        helper.setFrom(srcEmail);
-        helper.setTo(desEmail);
-        helper.setSubject("Smart Watering - Mã xác thực OTP");
-        helper.setText(htmlContent, true);
+        Email from = new Email(srcEmail);
+        String subject = "Smart Watering - Mã xác thực OTP";
+        Email to = new Email(desEmail);
+        Content content = new Content("text/html", htmlContent);
+        Mail mail = new Mail(from, subject, to, content);
 
-        mailSender.send(message);
+        SendGrid sendGrid = new SendGrid(sendGridApiKey);
+        Request request = new Request();
+        request.setMethod(Method.POST);
+        request.setEndpoint("mail/send");
+        request.setBody(mail.build());
+        Response response = sendGrid.api(request);
+        log.info("SendGrid response Status: {}", response.getStatusCode());
+        log.info("SendGrid response Body: {}", response.getBody());
     }
 
 }

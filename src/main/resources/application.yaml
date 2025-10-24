@@ -19,16 +19,7 @@ spring:
     time-zone: Asia/Ho_Chi_Minh
 
   mail:
-    host: smtp.gmail.com
-    port: 587
-    username: luungocloi24052004@gmail.com
-    password: ${SMTP_PASSWORD}
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
+    username: smartwateringorg@gmail.com
 
 jwt:
   signerKey: ${SIGNER_KEY}
@@ -40,3 +31,6 @@ mqtt:
   clientId: smart-watering
   username: ${BROKER_USERNAME}
   password: ${BROKER_PASSWORD}
+
+sendgrid:
+  api-key: ${SENDGRID_API_KEY}

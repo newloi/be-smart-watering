@@ -3,28 +3,22 @@ package com.smart_watering_system.SmartWateringSystem.service;
 import com.nimbusds.jwt.SignedJWT;
 import com.smart_watering_system.SmartWateringSystem.dto.request.UserRequest;
 import com.smart_watering_system.SmartWateringSystem.dto.response.UserResponse;
-import com.smart_watering_system.SmartWateringSystem.entity.InvalidatedToken;
 import com.smart_watering_system.SmartWateringSystem.entity.User;
 import com.smart_watering_system.SmartWateringSystem.enums.ErrorCode;
 import com.smart_watering_system.SmartWateringSystem.exception.AppException;
 import com.smart_watering_system.SmartWateringSystem.mapper.UserMapper;
-import com.smart_watering_system.SmartWateringSystem.repository.InvalidatedTokenRepository;
 import com.smart_watering_system.SmartWateringSystem.repository.UserRepository;
-import jakarta.mail.MessagingException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.Date;
-import java.util.List;
 
 @Slf4j
 @Service
@@ -38,7 +32,7 @@ public class UserService {
     MailService mailService;
     TokenService tokenService;
 
-    public UserResponse create(UserRequest request) throws MessagingException, IOException {
+    public UserResponse create(UserRequest request) throws IOException {
         var user = userMapper.toUser(request);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setVerified(false);
@@ -52,7 +46,8 @@ public class UserService {
         }
 
         String desEmail = request.getEmail();
-        mailService.sendOtpEmail(desEmail, tokenService.generateOtp(desEmail));
+        mailService.sendOtpEmailAsync(desEmail, tokenService.generateOtp(desEmail));
+
         return userMapper.toUserResponse(user);
     }
 
