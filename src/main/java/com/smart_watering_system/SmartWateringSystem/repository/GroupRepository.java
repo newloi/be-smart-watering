@@ -1,5 +1,6 @@
 package com.smart_watering_system.SmartWateringSystem.repository;
 
+import com.smart_watering_system.SmartWateringSystem.entity.Device;
 import com.smart_watering_system.SmartWateringSystem.entity.Group;
 import com.smart_watering_system.SmartWateringSystem.entity.User;
 import org.springframework.data.domain.Pageable;
@@ -19,4 +20,6 @@ public interface GroupRepository extends JpaRepository<Group, String> {
 
     @Query("SELECT g FROM Group g LEFT JOIN FETCH g.histories WHERE g.id = :id")
     Group findByIdWithHistories(@Param("id") String id);
+
+    List<Group> findByUserAndNameContainingIgnoreCase(User user, String keyword, Pageable pageable);
 }

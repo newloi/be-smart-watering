@@ -85,4 +85,15 @@ public class DeviceController {
                 .build();
     }
 
+    @GetMapping("/search")
+    ApiResponse<List<DeviceResponse>> searchDeviceByName(@RequestHeader("Authorization") String authHeader,
+                                                         @RequestParam("name") String keyword,
+                                                         @PageableDefault(sort = "createdAt",
+                                                                 direction = Sort.Direction.DESC) Pageable pageable) {
+        return ApiResponse.<List<DeviceResponse>>builder()
+                .statusCode(HttpStatus.OK.value())
+                .data(deviceService.searchByKeyword(authHeader, keyword, pageable))
+                .build();
+    }
+
 }

@@ -22,4 +22,6 @@ public interface DeviceRepository extends JpaRepository<Device, String> {
 
     @Query("SELECT d FROM Device d LEFT JOIN FETCH d.histories WHERE d.id = :id")
     Device findByIdWithHistories(@Param("id") String id);
+
+    List<Device> findByUserAndNameContainingIgnoreCase(User user, String keyword, Pageable pageable);
 }

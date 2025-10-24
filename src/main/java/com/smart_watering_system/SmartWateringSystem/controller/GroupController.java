@@ -2,6 +2,7 @@ package com.smart_watering_system.SmartWateringSystem.controller;
 
 import com.smart_watering_system.SmartWateringSystem.dto.request.GroupRequest;
 import com.smart_watering_system.SmartWateringSystem.dto.response.ApiResponse;
+import com.smart_watering_system.SmartWateringSystem.dto.response.DeviceResponse;
 import com.smart_watering_system.SmartWateringSystem.dto.response.GroupDetailResponse;
 import com.smart_watering_system.SmartWateringSystem.dto.response.GroupResponse;
 import com.smart_watering_system.SmartWateringSystem.service.GroupService;
@@ -72,6 +73,17 @@ public class GroupController {
 
         return ApiResponse.<Void>builder()
                 .statusCode(HttpStatus.OK.value())
+                .build();
+    }
+
+    @GetMapping("/search")
+    ApiResponse<List<GroupResponse>> searchDeviceByName(@RequestHeader("Authorization") String authHeader,
+                                                         @RequestParam("name") String keyword,
+                                                         @PageableDefault(sort = "createdAt",
+                                                                 direction = Sort.Direction.DESC) Pageable pageable) {
+        return ApiResponse.<List<GroupResponse>>builder()
+                .statusCode(HttpStatus.OK.value())
+                .data(groupService.searchByKeyword(authHeader, keyword, pageable))
                 .build();
     }
 

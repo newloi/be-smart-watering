@@ -79,12 +79,18 @@ public class DeviceService {
     }
 
     public List<DeviceResponse> getAllFree(User user, Pageable pageable) {
-        return deviceRepository.findByGroupIsNullAndUser(user, pageable).stream().map(deviceMapper::toDeviceResponse).toList();
+        return deviceRepository.findByGroupIsNullAndUser(user, pageable)
+                .stream().map(deviceMapper::toDeviceResponse).toList();
     }
 
     public Device getByUser(String id, String authHeader) {
         return deviceRepository.findByIdAndUser(id, userService.getUser(authHeader))
                 .orElseThrow(() -> new AppException(ErrorCode.DEVICE_NOT_EXISTED));
+    }
+
+    public List<DeviceResponse> searchByKeyword(String authHeader, String keyword, Pageable pageable) {
+        return deviceRepository.findByUserAndNameContainingIgnoreCase(userService.getUser(authHeader), keyword, pageable)
+                .stream().map(deviceMapper::toDeviceResponse).toList();
     }
 
 }

@@ -1,6 +1,7 @@
 package com.smart_watering_system.SmartWateringSystem.service;
 
 import com.smart_watering_system.SmartWateringSystem.dto.request.GroupRequest;
+import com.smart_watering_system.SmartWateringSystem.dto.response.DeviceResponse;
 import com.smart_watering_system.SmartWateringSystem.dto.response.GroupDetailResponse;
 import com.smart_watering_system.SmartWateringSystem.dto.response.GroupResponse;
 import com.smart_watering_system.SmartWateringSystem.entity.Device;
@@ -120,6 +121,11 @@ public class GroupService {
     public Group getByUser(String id, String authHeader) {
         return groupRepository.findByIdAndUser(id, userService.getUser(authHeader))
                 .orElseThrow(() -> new AppException(ErrorCode.GROUP_NOT_EXISTED));
+    }
+
+    public List<GroupResponse> searchByKeyword(String authHeader, String keyword, Pageable pageable) {
+        return groupRepository.findByUserAndNameContainingIgnoreCase(userService.getUser(authHeader), keyword, pageable)
+                .stream().map(groupMapper::toGroupResponse).toList();
     }
 
 }
