@@ -15,11 +15,17 @@ spring:
       hibernate:
         jdbc:
           time_zone: Asia/Ho_Chi_Minh
+
   jackson:
     time-zone: Asia/Ho_Chi_Minh
 
   mail:
     username: smartwateringorg@gmail.com
+
+  cache:
+    type: caffeine
+    caffeine:
+      spec: initialCapacity=100,maximumSize=1000,expireAfterAccess=5m
 
 jwt:
   signerKey: ${SIGNER_KEY}
