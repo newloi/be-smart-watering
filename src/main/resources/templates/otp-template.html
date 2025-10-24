@@ -1,49 +1,20 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f9fafb;
-            color: #333;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            background-color: #fff;
-            margin: 40px auto;
-            padding: 24px;
-            border-radius: 10px;
-            max-width: 480px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .title {
-            font-size: 20px;
-            font-weight: bold;
-            color: #007bff;
-        }
-        .otp {
-            font-size: 32px;
-            font-weight: bold;
-            color: #ff5722;
-            letter-spacing: 3px;
-        }
-        .footer {
-            font-size: 13px;
-            color: #888;
-            margin-top: 24px;
-        }
-    </style>
+    <title>Mã Xác Thực OTP</title>
 </head>
 <body>
-<div class="container">
-    <div class="title">Xác thực tài khoản</div>
-    <p>Xin chào,</p>
-    <p>Mã OTP của bạn là:</p>
-    <p class="otp">${otp}</p>
-    <p>Mã có hiệu lực trong <b>5 phút</b>. Vui lòng không chia sẻ với bất kỳ ai.</p>
-    <div class="footer">— Đội ngũ Smart Watering 💙</div>
+<div style="font-family: Arial, sans-serif; padding: 20px;">
+    <h2>Chào bạn,</h2>
+    <p>Đây là mã xác thực (OTP) của bạn cho hệ thống Smart Watering:</p>
+
+    <h1 style="color: #007bff; text-align: center; border: 1px solid #ccc; padding: 10px;" th:text="${otpCode}">
+        123456
+    </h1>
+
+    <p>Mã này sẽ hết hạn sau 5 phút. Vui lòng không chia sẻ mã này với bất kỳ ai.</p>
+    <p>Xin cảm ơn!</p>
 </div>
 </body>
 </html>
