@@ -25,7 +25,7 @@ spring:
   cache:
     type: caffeine
     caffeine:
-      spec: initialCapacity=100,maximumSize=1000,expireAfterAccess=5m
+      spec: initialCapacity=50,maximumSize=500,expireAfterAccess=5m
 
 jwt:
   signerKey: ${SIGNER_KEY}

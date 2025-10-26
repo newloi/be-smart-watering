@@ -14,6 +14,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -53,6 +56,7 @@ public class DeviceService {
                 .map(deviceMapper::toDeviceResponse).toList();
     }
 
+    @Cacheable(value = "devices", key = "#id + '-' + #user.id")
     public DeviceResponse get(String id, User user) throws MqttException {
         var device = deviceRepository.findByIdAndUser(id, user)
                 .orElseThrow(() -> new AppException(ErrorCode.DEVICE_NOT_EXISTED));
@@ -62,11 +66,13 @@ public class DeviceService {
         return deviceMapper.toDeviceResponse(device);
     }
 
+    @CacheEvict(value = "devices", key = "#id + '-' + #user.id")
     @Transactional
     public void delete(String id, User user) {
         deviceRepository.deleteByIdAndUser(id, user);
     }
 
+    @CachePut(value = "devices", key = "#id + '-' + #user.id")
     public DeviceResponse update(String id, DeviceRequest request, User user) {
         var device = deviceRepository.findByIdAndUser(id, user)
                 .orElseThrow(() -> new AppException(ErrorCode.DEVICE_NOT_EXISTED));
