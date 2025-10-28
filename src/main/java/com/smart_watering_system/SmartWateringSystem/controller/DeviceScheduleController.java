@@ -26,20 +26,18 @@ public class DeviceScheduleController {
     DeviceSchedulerService deviceSchedulerService;
 
     @PostMapping
-    public ApiResponse<ScheduleResponse> createSchedule(@RequestHeader("Authorization") String authHeader,
-                                                        @RequestBody @Valid ScheduleRequest request,
+    public ApiResponse<ScheduleResponse> createSchedule(@RequestBody @Valid ScheduleRequest request,
                                                         @PathVariable("id") String id) {
         return ApiResponse.<ScheduleResponse>builder()
                 .statusCode(HttpStatus.OK.value())
-                .data(deviceSchedulerService.create(id, request, authHeader))
+                .data(deviceSchedulerService.create(id, request))
                 .build();
     }
 
     @DeleteMapping("/{scheduleId}")
-    public ApiResponse<Void> deleteSchedule(@RequestHeader("Authorization") String authHeader,
-                                            @PathVariable("id") String id,
+    public ApiResponse<Void> deleteSchedule(@PathVariable("id") String id,
                                             @PathVariable("scheduleId") String scheduleId) {
-        deviceSchedulerService.deleteSchedule(authHeader, id, scheduleId);
+        deviceSchedulerService.deleteSchedule(id, scheduleId);
 
         return ApiResponse.<Void>builder()
                 .statusCode(HttpStatus.OK.value())
@@ -47,22 +45,20 @@ public class DeviceScheduleController {
     }
 
     @PutMapping("/{scheduleId}")
-    public ApiResponse<ScheduleResponse> updateSchedule(@RequestHeader("Authorization") String authHeader,
-                                                        @RequestBody @Valid ScheduleRequest request,
+    public ApiResponse<ScheduleResponse> updateSchedule(@RequestBody @Valid ScheduleRequest request,
                                                         @PathVariable("id") String id,
                                                         @PathVariable("scheduleId") String scheduleId) {
         return ApiResponse.<ScheduleResponse>builder()
                 .statusCode(HttpStatus.OK.value())
-                .data(deviceSchedulerService.update(authHeader, id, scheduleId, request))
+                .data(deviceSchedulerService.update(id, scheduleId, request))
                 .build();
     }
 
     @PostMapping("/{scheduleId}/trigger")
-    public ApiResponse<Void> triggerSchedule(@RequestHeader("Authorization") String authHeader,
-                                             @RequestBody @Valid TriggerRequest request,
+    public ApiResponse<Void> triggerSchedule(@RequestBody @Valid TriggerRequest request,
                                              @PathVariable("id") String id,
                                              @PathVariable("scheduleId") String scheduleId) {
-        deviceSchedulerService.trigger(authHeader, id, scheduleId, request);
+        deviceSchedulerService.trigger(id, scheduleId, request);
 
         return ApiResponse.<Void>builder()
                 .statusCode(HttpStatus.OK.value())
@@ -70,13 +66,12 @@ public class DeviceScheduleController {
     }
 
     @GetMapping
-    public ApiResponse<List<ScheduleResponse>> getAllSchedule(@RequestHeader("Authorization") String authHeader,
-                                                              @PathVariable("id") String id,
+    public ApiResponse<List<ScheduleResponse>> getAllSchedule(@PathVariable("id") String id,
                                                               @PageableDefault(sort = "createdAt",
                                                                       direction = Sort.Direction.DESC) Pageable pageable) {
         return ApiResponse.<List<ScheduleResponse>>builder()
                 .statusCode(HttpStatus.OK.value())
-                .data(deviceSchedulerService.getAll(id, authHeader, pageable))
+                .data(deviceSchedulerService.getAll(id, pageable))
                 .build();
     }
 

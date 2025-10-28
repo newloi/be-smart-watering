@@ -12,7 +12,6 @@ import com.smart_watering_system.SmartWateringSystem.mapper.DataSensorMapper;
 import com.smart_watering_system.SmartWateringSystem.mapper.DeviceMapper;
 import com.smart_watering_system.SmartWateringSystem.repository.DataSensorHistoryRepository;
 import com.smart_watering_system.SmartWateringSystem.repository.DeviceRepository;
-import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -40,13 +39,13 @@ public class DeviceService {
     DataSensorMapper dataSensorMapper;
     RealtimeService realtimeService;
 
-    public DeviceResponse create(DeviceRequest request, User user) {
+    public DeviceResponse create(DeviceRequest request) {
         var device = deviceMapper.toDevice(request);
 
         device.setTopicSensor("sensor/" + request.getDeviceId());
         device.setTopicWatering("watering/" + request.getDeviceId());
         device.setOnline(true);
-        device.setUser(user);
+        device.setUser(userService.getUser());
 
         try {
             device = deviceRepository.save(device);
@@ -57,8 +56,8 @@ public class DeviceService {
         return deviceMapper.toDeviceResponse(device);
     }
 
-    public List<DeviceResponse> getAll(User user, Pageable pageable) throws MqttException {
-        return deviceRepository.findAllByUser(user, pageable).stream()
+    public List<DeviceResponse> getAll(Pageable pageable) {
+        return deviceRepository.findAllByUser(userService.getUser(), pageable).stream()
                 .map(deviceMapper::toDeviceResponse).toList();
     }
 
@@ -103,23 +102,23 @@ public class DeviceService {
         return deviceMapper.toDeviceResponse(deviceRepository.save(device));
     }
 
-    public List<DeviceResponse> getAllFree(User user, Pageable pageable) {
-        return deviceRepository.findByGroupIsNullAndUser(user, pageable)
+    public List<DeviceResponse> getAllFree(Pageable pageable) {
+        return deviceRepository.findByGroupIsNullAndUser(userService.getUser(), pageable)
                 .stream().map(deviceMapper::toDeviceResponse).toList();
     }
 
-    public Device getByUser(String id, String authHeader) {
-        return deviceRepository.findByIdAndUser(id, userService.getUser(authHeader))
+    public Device getById(String id) {
+        return deviceRepository.findByIdAndUser(id, userService.getUser())
                 .orElseThrow(() -> new AppException(ErrorCode.DEVICE_NOT_EXISTED));
     }
 
-    public List<DeviceResponse> searchByKeyword(String authHeader, String keyword, Pageable pageable) {
-        return deviceRepository.findByUserAndNameContainingIgnoreCase(userService.getUser(authHeader), keyword, pageable)
+    public List<DeviceResponse> searchByKeyword(String keyword, Pageable pageable) {
+        return deviceRepository.findByUserAndNameContainingIgnoreCase(userService.getUser(), keyword, pageable)
                 .stream().map(deviceMapper::toDeviceResponse).toList();
     }
 
-    public List<DataSensorResponse> getHistorySensor(String id, User user, Pageable pageable) {
-        Device device = deviceRepository.findByIdAndUser(id, user)
+    public List<DataSensorResponse> getHistorySensor(String id,Pageable pageable) {
+        Device device = deviceRepository.findByIdAndUser(id, userService.getUser())
                 .orElseThrow(() -> new AppException(ErrorCode.DEVICE_NOT_EXISTED));
 
         List<DataSensorHistory> histories = dataSensorHistoryRepository.findAllByDeviceOrderByTimestampDesc(device, pageable);

@@ -1,19 +1,16 @@
 package com.smart_watering_system.SmartWateringSystem.service;
 
 import com.smart_watering_system.SmartWateringSystem.dto.request.GroupRequest;
-import com.smart_watering_system.SmartWateringSystem.dto.response.DeviceResponse;
 import com.smart_watering_system.SmartWateringSystem.dto.response.GroupDetailResponse;
 import com.smart_watering_system.SmartWateringSystem.dto.response.GroupResponse;
 import com.smart_watering_system.SmartWateringSystem.entity.Device;
 import com.smart_watering_system.SmartWateringSystem.entity.Group;
-import com.smart_watering_system.SmartWateringSystem.entity.User;
 import com.smart_watering_system.SmartWateringSystem.enums.ErrorCode;
 import com.smart_watering_system.SmartWateringSystem.exception.AppException;
 import com.smart_watering_system.SmartWateringSystem.mapper.DeviceMapper;
 import com.smart_watering_system.SmartWateringSystem.mapper.GroupMapper;
 import com.smart_watering_system.SmartWateringSystem.repository.DeviceRepository;
 import com.smart_watering_system.SmartWateringSystem.repository.GroupRepository;
-import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -21,7 +18,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -35,7 +31,8 @@ public class GroupService {
     DeviceMapper deviceMapper;
     UserService userService;
 
-    public GroupDetailResponse create(GroupRequest request, User user) {
+    public GroupDetailResponse create(GroupRequest request) {
+        var user = userService.getUser();
         var group = groupMapper.toGroup(request);
         var devices = request.getDevices().stream()
                 .map(id -> deviceRepository.findByIdAndUser(id, user)
@@ -62,13 +59,13 @@ public class GroupService {
         return groupDetailResponse;
     }
 
-    public List<GroupResponse> getAll(User user, Pageable pageable) {
-        var groups = groupRepository.findAllByUser(user, pageable);
+    public List<GroupResponse> getAll(Pageable pageable) {
+        var groups = groupRepository.findAllByUser(userService.getUser(), pageable);
         return groups.stream().map(groupMapper::toGroupResponse).toList();
     }
 
-    public GroupDetailResponse get(String id, User user) {
-        var group = groupRepository.findByIdAndUser(id, user)
+    public GroupDetailResponse get(String id) {
+        var group = groupRepository.findByIdAndUser(id, userService.getUser())
                 .orElseThrow(() -> new AppException(ErrorCode.GROUP_NOT_EXISTED));
 
         var devices = group.getDevices().stream().map(deviceMapper::toDeviceResponse).toList();
@@ -79,7 +76,8 @@ public class GroupService {
         return groupDetailResponse;
     }
 
-    public GroupDetailResponse update(String id, GroupRequest request, User user) {
+    public GroupDetailResponse update(String id, GroupRequest request) {
+        var user = userService.getUser();
         var group = groupRepository.findByIdAndUser(id, user)
                 .orElseThrow(() -> new AppException(ErrorCode.GROUP_NOT_EXISTED));
 
@@ -113,19 +111,19 @@ public class GroupService {
         return groupDetailResponse;
     }
 
-    public void delete(String id, User user) {
-        var group = groupRepository.findByIdAndUser(id, user)
+    public void delete(String id) {
+        var group = groupRepository.findByIdAndUser(id, userService.getUser())
                 .orElseThrow(() -> new AppException(ErrorCode.GROUP_NOT_EXISTED));
         groupRepository.delete(group);
     }
 
-    public Group getByUser(String id, String authHeader) {
-        return groupRepository.findByIdAndUser(id, userService.getUser(authHeader))
+    public Group getById(String id) {
+        return groupRepository.findByIdAndUser(id, userService.getUser())
                 .orElseThrow(() -> new AppException(ErrorCode.GROUP_NOT_EXISTED));
     }
 
-    public List<GroupResponse> searchByKeyword(String authHeader, String keyword, Pageable pageable) {
-        return groupRepository.findByUserAndNameContainingIgnoreCase(userService.getUser(authHeader), keyword, pageable)
+    public List<GroupResponse> searchByKeyword(String keyword, Pageable pageable) {
+        return groupRepository.findByUserAndNameContainingIgnoreCase(userService.getUser(), keyword, pageable)
                 .stream().map(groupMapper::toGroupResponse).toList();
     }
 

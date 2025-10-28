@@ -35,9 +35,10 @@ public class DeviceSchedulerService {
     TaskScheduler taskScheduler;
     DeviceWateringService deviceWateringService;
     Map<String, ScheduledFuture<?>> schedules;
+    UserService userService;
 
-    public ScheduleResponse create(String id, ScheduleRequest request, String authHeader) {
-        var device = deviceService.getByUser(id, authHeader);
+    public ScheduleResponse create(String id, ScheduleRequest request) {
+        var device = deviceService.getById(id);
 
         var schedule = scheduleMapper.toDeviceSchedule(request);
         schedule.setDevice(device);
@@ -104,8 +105,8 @@ public class DeviceSchedulerService {
         runSchedule(schedule);
     }
 
-    public void deleteSchedule(String authHeader, String id, String scheduleId) {
-        var device = deviceService.getByUser(id, authHeader);
+    public void deleteSchedule(String id, String scheduleId) {
+        var device = deviceService.getById(id);
         var schedule = deviceScheduleRepository.findByIdAndDevice(scheduleId, device)
                         .orElseThrow(() -> new AppException(ErrorCode.SCHEDULE_NOT_EXISTED));
 
@@ -114,8 +115,8 @@ public class DeviceSchedulerService {
         deviceScheduleRepository.delete(schedule);
     }
 
-    public ScheduleResponse update(String authHeader, String id, String scheduleId, ScheduleRequest request) {
-        var device = deviceService.getByUser(id, authHeader);
+    public ScheduleResponse update(String id, String scheduleId, ScheduleRequest request) {
+        var device = deviceService.getById(id);
         var schedule = deviceScheduleRepository.findByIdAndDevice(scheduleId, device)
                 .orElseThrow(() -> new AppException(ErrorCode.SCHEDULE_NOT_EXISTED));
 
@@ -130,8 +131,8 @@ public class DeviceSchedulerService {
         return scheduleMapper.toScheduleResponse(schedule);
     }
 
-    public void trigger(String authHeader, String id, String scheduleId, TriggerRequest request) {
-        var device = deviceService.getByUser(id, authHeader);
+    public void trigger(String id, String scheduleId, TriggerRequest request) {
+        var device = deviceService.getById(id);
         var schedule = deviceScheduleRepository.findByIdAndDevice(scheduleId, device)
                 .orElseThrow(() -> new AppException(ErrorCode.SCHEDULE_NOT_EXISTED));
 
@@ -139,8 +140,8 @@ public class DeviceSchedulerService {
         else if(!request.isStatus() && !schedule.isStatus()) turnOnSchedule(schedule);
     }
 
-    public List<ScheduleResponse> getAll(String id, String authHeader, Pageable pageable) {
-        var device = deviceService.getByUser(id, authHeader);
+    public List<ScheduleResponse> getAll(String id, Pageable pageable) {
+        var device = deviceService.getById(id);
 
         List<DeviceSchedule> schedules = deviceScheduleRepository.findAllByDevice(device, pageable);
         return schedules.stream().map(scheduleMapper::toScheduleResponse).toList();

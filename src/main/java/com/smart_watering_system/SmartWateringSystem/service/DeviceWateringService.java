@@ -37,11 +37,12 @@ public class DeviceWateringService {
     MqttSevice mqttSevice;
     WateringMapper wateringMapper;
     DeviceRepository deviceRepository;
+    UserService userService;
 
     @Transactional
-    public WateringResponse doAction(String id, WateringRequest request, User user, boolean byGroup)
+    public WateringResponse doAction(String id, WateringRequest request, boolean byGroup)
             throws MqttException, JsonProcessingException {
-        Device device = deviceRepository.findByIdAndUser(id, user)
+        Device device = deviceRepository.findByIdAndUser(id, userService.getUser())
                 .orElseThrow(() -> new AppException(ErrorCode.DEVICE_NOT_EXISTED));
 
         Action action = request.getAction();
@@ -88,8 +89,8 @@ public class DeviceWateringService {
         return WateringResponse.builder().build();
     }
 
-    public List<WateringResponse> getAllHistories(String id, User user) {
-        Device device = deviceRepository.findByIdAndUser(id, user)
+    public List<WateringResponse> getAllHistories(String id) {
+        Device device = deviceRepository.findByIdAndUser(id, userService.getUser())
                 .orElseThrow(() -> new AppException(ErrorCode.DEVICE_NOT_EXISTED));
 
         List<DeviceWateringHistory> histories = deviceWateringHistoryRepository

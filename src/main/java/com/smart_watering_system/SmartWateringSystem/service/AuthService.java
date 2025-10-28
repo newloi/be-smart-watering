@@ -62,7 +62,7 @@ public class AuthService {
     }
 
     public void changePassword(String authHeader, ChangePasswordRequest request) throws ParseException {
-        User user = userService.getUser(authHeader);
+        User user = userService.getUser();
 
         if(!Objects.equals(request.getNewPassword(), request.getConfirmNewPassword()))
             throw new AppException(ErrorCode.PASS_NOT_MATCH);

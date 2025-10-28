@@ -26,50 +26,44 @@ import java.util.List;
 public class GroupController {
 
     GroupService groupService;
-    UserService userService;
 
     @PostMapping
-    ApiResponse<GroupDetailResponse> createGroup(@RequestHeader("Authorization") String headerAuth,
-                                                 @RequestBody @Valid GroupRequest request) {
+    ApiResponse<GroupDetailResponse> createGroup(@RequestBody @Valid GroupRequest request) {
         return ApiResponse.<GroupDetailResponse>builder()
                 .statusCode(HttpStatus.CREATED.value())
-                .data(groupService.create(request, userService.getUser(headerAuth)))
+                .data(groupService.create(request))
                 .build();
     }
 
     @GetMapping
-    ApiResponse<List<GroupResponse>> getAllGroups(@RequestHeader("Authorization") String headerAuth,
-                                                  @PageableDefault(sort = "createdAt",
-                                                          direction = Sort.Direction.DESC) Pageable pageable) {
+    ApiResponse<List<GroupResponse>> getAllGroups(@PageableDefault(sort = "createdAt",
+            direction = Sort.Direction.DESC) Pageable pageable) {
         return ApiResponse.<List<GroupResponse>>builder()
                 .statusCode(HttpStatus.OK.value())
-                .data(groupService.getAll(userService.getUser(headerAuth), pageable))
+                .data(groupService.getAll(pageable))
                 .build();
     }
 
     @GetMapping("/{id}")
-    ApiResponse<GroupDetailResponse> getGroup(@RequestHeader("Authorization") String headerAuth,
-                                              @PathVariable("id") String id) {
+    ApiResponse<GroupDetailResponse> getGroup(@PathVariable("id") String id) {
         return ApiResponse.<GroupDetailResponse>builder()
                 .statusCode(HttpStatus.OK.value())
-                .data(groupService.get(id, userService.getUser(headerAuth)))
+                .data(groupService.get(id))
                 .build();
     }
 
     @PutMapping("/{id}")
-    ApiResponse<GroupDetailResponse> updateGroup(@RequestHeader("Authorization") String headerAuth,
-                                                 @PathVariable("id") String id,
+    ApiResponse<GroupDetailResponse> updateGroup(@PathVariable("id") String id,
                                                  @RequestBody @Valid GroupRequest request) {
         return ApiResponse.<GroupDetailResponse>builder()
                 .statusCode(HttpStatus.OK.value())
-                .data(groupService.update(id, request, userService.getUser(headerAuth)))
+                .data(groupService.update(id, request))
                 .build();
     }
 
     @DeleteMapping("/{id}")
-    ApiResponse<Void> deleteGroup(@RequestHeader("Authorization") String headerAuth,
-                                  @PathVariable("id") String id) {
-        groupService.delete(id, userService.getUser(headerAuth));
+    ApiResponse<Void> deleteGroup(@PathVariable("id") String id) {
+        groupService.delete(id);
 
         return ApiResponse.<Void>builder()
                 .statusCode(HttpStatus.OK.value())
@@ -77,13 +71,12 @@ public class GroupController {
     }
 
     @GetMapping("/search")
-    ApiResponse<List<GroupResponse>> searchDeviceByName(@RequestHeader("Authorization") String authHeader,
-                                                         @RequestParam("name") String keyword,
-                                                         @PageableDefault(sort = "createdAt",
-                                                                 direction = Sort.Direction.DESC) Pageable pageable) {
+    ApiResponse<List<GroupResponse>> searchDeviceByName(@RequestParam("name") String keyword,
+                                                        @PageableDefault(sort = "createdAt",
+                                                                direction = Sort.Direction.DESC) Pageable pageable) {
         return ApiResponse.<List<GroupResponse>>builder()
                 .statusCode(HttpStatus.OK.value())
-                .data(groupService.searchByKeyword(authHeader, keyword, pageable))
+                .data(groupService.searchByKeyword(keyword, pageable))
                 .build();
     }
 

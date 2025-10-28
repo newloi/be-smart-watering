@@ -24,25 +24,22 @@ import java.util.List;
 public class GroupWateringController {
 
     GroupWateringService groupWateringService;
-    UserService userService;
 
     @PostMapping
-    ApiResponse<WateringResponse> doAction(@RequestHeader("Authorization") String headerAuth,
-                                           @RequestBody @Valid WateringRequest request,
+    ApiResponse<WateringResponse> doAction(@RequestBody @Valid WateringRequest request,
                                            @PathVariable("id") String id) {
 
         return ApiResponse.<WateringResponse>builder()
                 .statusCode(HttpStatus.OK.value())
-                .data(groupWateringService.doAction(id, request, userService.getUser(headerAuth)))
+                .data(groupWateringService.doAction(id, request))
                 .build();
     }
 
     @GetMapping("/history")
-    ApiResponse<List<WateringResponse>> getAllHistories(@RequestHeader("Authorization") String headerAuth,
-                                                        @PathVariable String id) {
+    ApiResponse<List<WateringResponse>> getAllHistories(@PathVariable String id) {
         return ApiResponse.<List<WateringResponse>>builder()
                 .statusCode(HttpStatus.OK.value())
-                .data(groupWateringService.getAllHistories(id, userService.getUser(headerAuth)))
+                .data(groupWateringService.getAllHistories(id))
                 .build();
     }
 

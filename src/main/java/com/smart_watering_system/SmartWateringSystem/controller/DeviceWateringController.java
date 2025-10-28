@@ -23,24 +23,21 @@ import java.util.List;
 public class DeviceWateringController {
 
     DeviceWateringService deviceWateringService;
-    UserService userService;
 
     @PostMapping
-    ApiResponse<WateringResponse> doAction(@RequestHeader("Authorization") String headerAuth,
-                                           @RequestBody @Valid WateringRequest request,
+    ApiResponse<WateringResponse> doAction(@RequestBody @Valid WateringRequest request,
                                            @PathVariable("id") String id) throws MqttException, JsonProcessingException {
         return ApiResponse.<WateringResponse>builder()
                 .statusCode(HttpStatus.OK.value())
-                .data(deviceWateringService.doAction(id, request, userService.getUser(headerAuth), false))
+                .data(deviceWateringService.doAction(id, request,false))
                 .build();
     }
 
     @GetMapping("/history")
-    ApiResponse<List<WateringResponse>> getAllHistories(@RequestHeader("Authorization") String headerAuth,
-                                                        @PathVariable("id") String id) {
+    ApiResponse<List<WateringResponse>> getAllHistories(@PathVariable("id") String id) {
         return ApiResponse.<List<WateringResponse>>builder()
                 .statusCode(HttpStatus.OK.value())
-                .data(deviceWateringService.getAllHistories(id, userService.getUser(headerAuth)))
+                .data(deviceWateringService.getAllHistories(id))
                 .build();
     }
 
