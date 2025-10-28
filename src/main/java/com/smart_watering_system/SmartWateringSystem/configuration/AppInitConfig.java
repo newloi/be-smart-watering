@@ -37,6 +37,9 @@ public class AppInitConfig {
             mqttSevice.subcribeAsync("status/#",
                     (topic, message) -> realtimeService.sendDeviceStatusAsync(topic, message.toString()));
 
+            mqttSevice.subcribeAsync("sensor/#",
+                    (topic, message) -> realtimeService.sendDataAsync(topic, message.toString()));
+
             List<DeviceSchedule> deviceSchedules = deviceScheduleRepository.findAll();
             deviceSchedules.forEach(deviceSchedulerService::runSchedule);
 

@@ -25,6 +25,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -66,8 +67,6 @@ public class DeviceService {
         var device = deviceRepository.findByIdAndUser(id, user)
                 .orElseThrow(() -> new AppException(ErrorCode.DEVICE_NOT_EXISTED));
 
-        mqttSevice.subcribeAsync(device.getTopicSensor(),
-                (topic, message) -> realtimeService.sendDataAsync(topic, message.toString()));
         mqttSevice.subcribeAsync(device.getTopicWatering(),
                 (topic, message) -> realtimeService.sendPumpStatus(topic, message.toString()));
 
@@ -75,19 +74,31 @@ public class DeviceService {
     }
 
     @CacheEvict(value = "devices", key = "#id + '-' + #user.id")
-    @Transactional
-    public void delete(String id, User user) {
-        deviceRepository.deleteByIdAndUser(id, user);
-    }
-
-    @CachePut(value = "devices", key = "#id + '-' + #user.id")
-    public DeviceResponse update(String id, DeviceRequest request, User user) {
+    public void delete(String id, User user) throws MqttException {
         var device = deviceRepository.findByIdAndUser(id, user)
                 .orElseThrow(() -> new AppException(ErrorCode.DEVICE_NOT_EXISTED));
 
-        deviceMapper.updateDevice(device, request);
-        device.setTopicSensor("sensor/" + request.getDeviceId());
-        device.setTopicWatering("watering/" + request.getDeviceId());
+        mqttSevice.unsubscribeAsync(
+                new String[]{device.getTopicSensor(), device.getTopicWatering(), "status/" + device.getDeviceId()}
+        );
+
+        deviceRepository.delete(device);
+    }
+
+    @CachePut(value = "devices", key = "#id + '-' + #user.id")
+    public DeviceResponse update(String id, DeviceRequest request, User user) throws MqttException {
+        var device = deviceRepository.findByIdAndUser(id, user)
+                .orElseThrow(() -> new AppException(ErrorCode.DEVICE_NOT_EXISTED));
+
+        if(!Objects.equals(device.getDeviceId(), request.getDeviceId())) {
+            mqttSevice.unsubscribeAsync(
+                    new String[]{device.getTopicSensor(), device.getTopicWatering(), "status/" + device.getDeviceId()}
+            );
+
+            deviceMapper.updateDevice(device, request);
+            device.setTopicSensor("sensor/" + request.getDeviceId());
+            device.setTopicWatering("watering/" + request.getDeviceId());
+        }
 
         return deviceMapper.toDeviceResponse(deviceRepository.save(device));
     }

@@ -113,9 +113,10 @@ public class GroupService {
         return groupDetailResponse;
     }
 
-    @Transactional
     public void delete(String id, User user) {
-        groupRepository.deleteByIdAndUser(id, user);
+        var group = groupRepository.findByIdAndUser(id, user)
+                .orElseThrow(() -> new AppException(ErrorCode.GROUP_NOT_EXISTED));
+        groupRepository.delete(group);
     }
 
     public Group getByUser(String id, String authHeader) {

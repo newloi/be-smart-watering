@@ -57,7 +57,7 @@ public class DeviceController {
 
     @DeleteMapping("/{id}")
     ApiResponse<Void> deleteDevice(@RequestHeader("Authorization") String headerAuthorizaion,
-                                   @PathVariable("id") String id) {
+                                   @PathVariable("id") String id) throws MqttException {
         deviceService.delete(id, userService.getUser(headerAuthorizaion));
 
         return ApiResponse.<Void>builder()
@@ -68,7 +68,7 @@ public class DeviceController {
     @PutMapping("/{id}")
     ApiResponse<DeviceResponse> updateDevice(@RequestHeader("Authorization") String headerAuthorizaion,
                                              @PathVariable("id") String id,
-                                             @RequestBody @Valid DeviceRequest request) {
+                                             @RequestBody @Valid DeviceRequest request) throws MqttException {
         return ApiResponse.<DeviceResponse>builder()
                 .statusCode(HttpStatus.OK.value())
                 .data(deviceService.update(id, request, userService.getUser(headerAuthorizaion)))
