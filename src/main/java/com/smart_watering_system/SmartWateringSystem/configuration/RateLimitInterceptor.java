@@ -39,7 +39,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         String methodKey = request.getMethod() + " " + request.getRequestURI();
 
         int capacity = 20, refillTokens = 20;
-        long refillPeriodSeconds = 10L;
+        long refillPeriodSeconds = 60L;
         if(handler instanceof HandlerMethod handlerMethod) {
             RateLimiter rateLimiter = handlerMethod.getMethodAnnotation(RateLimiter.class);
             if(rateLimiter == null) rateLimiter = handlerMethod.getBeanType().getAnnotation(RateLimiter.class);

@@ -1,6 +1,7 @@
 package com.smart_watering_system.SmartWateringSystem.controller;
 
 import com.nimbusds.jose.JOSEException;
+import com.smart_watering_system.SmartWateringSystem.annotation.RateLimiter;
 import com.smart_watering_system.SmartWateringSystem.dto.request.ChangePasswordRequest;
 import com.smart_watering_system.SmartWateringSystem.dto.request.IntrospectRequest;
 import com.smart_watering_system.SmartWateringSystem.dto.request.LoginRequest;
@@ -28,6 +29,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequestMapping("/auth")
+@RateLimiter(capacity = 5, refillTokens = 5, refillPeriodSeconds = 60)
 public class AuthController {
 
     AuthService authService;

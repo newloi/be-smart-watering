@@ -49,7 +49,6 @@ public class DeviceController {
     }
 
     @GetMapping("/{id}")
-
     ApiResponse<DeviceResponse> getDevice(@RequestHeader("Authorization") String headerAuthorizaion,
                                           @PathVariable("id") String id) throws MqttException {
         return ApiResponse.<DeviceResponse>builder()

@@ -1,5 +1,6 @@
 package com.smart_watering_system.SmartWateringSystem.controller;
 
+import com.smart_watering_system.SmartWateringSystem.annotation.RateLimiter;
 import com.smart_watering_system.SmartWateringSystem.dto.request.UserRequest;
 import com.smart_watering_system.SmartWateringSystem.dto.response.ApiResponse;
 import com.smart_watering_system.SmartWateringSystem.dto.response.UserResponse;
@@ -24,6 +25,7 @@ public class UserController {
     private final UserMapper userMapper;
 
     @PostMapping
+    @RateLimiter(capacity = 10, refillTokens = 10, refillPeriodSeconds = 60)
     ApiResponse<UserResponse> createUser(@RequestBody @Valid UserRequest request) throws IOException {
         return ApiResponse.<UserResponse>builder()
                 .statusCode(HttpStatus.CREATED.value())

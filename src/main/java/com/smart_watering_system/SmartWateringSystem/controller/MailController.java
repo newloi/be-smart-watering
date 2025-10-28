@@ -1,5 +1,6 @@
 package com.smart_watering_system.SmartWateringSystem.controller;
 
+import com.smart_watering_system.SmartWateringSystem.annotation.RateLimiter;
 import com.smart_watering_system.SmartWateringSystem.dto.request.SendEmailRequest;
 import com.smart_watering_system.SmartWateringSystem.dto.response.ApiResponse;
 import com.smart_watering_system.SmartWateringSystem.service.MailService;
@@ -26,6 +27,7 @@ public class MailController {
     TokenService tokenService;
 
     @PostMapping("/send")
+    @RateLimiter(capacity = 1, refillTokens = 1, refillPeriodSeconds = 60)
     ApiResponse<Void> sendOtpMail(@RequestBody @Valid SendEmailRequest request) throws IOException {
         String desEmail = request.getEmail();
         mailService.sendOtpEmailAsync(desEmail, tokenService.generateOtp(desEmail));
