@@ -1,18 +1,21 @@
 package com.smart_watering_system.SmartWateringSystem.service;
 
 import com.smart_watering_system.SmartWateringSystem.dto.request.DeviceRequest;
+import com.smart_watering_system.SmartWateringSystem.dto.response.DataSensorResponse;
 import com.smart_watering_system.SmartWateringSystem.dto.response.DeviceResponse;
+import com.smart_watering_system.SmartWateringSystem.entity.DataSensorHistory;
 import com.smart_watering_system.SmartWateringSystem.entity.Device;
 import com.smart_watering_system.SmartWateringSystem.entity.User;
 import com.smart_watering_system.SmartWateringSystem.enums.ErrorCode;
 import com.smart_watering_system.SmartWateringSystem.exception.AppException;
+import com.smart_watering_system.SmartWateringSystem.mapper.DataSensorMapper;
 import com.smart_watering_system.SmartWateringSystem.mapper.DeviceMapper;
+import com.smart_watering_system.SmartWateringSystem.repository.DataSensorHistoryRepository;
 import com.smart_watering_system.SmartWateringSystem.repository.DeviceRepository;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -21,7 +24,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Service
@@ -33,6 +35,9 @@ public class DeviceService {
     DeviceMapper deviceMapper;
     MqttSevice mqttSevice;
     UserService userService;
+    DataSensorHistoryRepository dataSensorHistoryRepository;
+    DataSensorMapper dataSensorMapper;
+    RealtimeService realtimeService;
 
     public DeviceResponse create(DeviceRequest request, User user) {
         var device = deviceMapper.toDevice(request);
@@ -51,7 +56,7 @@ public class DeviceService {
         return deviceMapper.toDeviceResponse(device);
     }
 
-    public List<DeviceResponse> getAll(User user, Pageable pageable) {
+    public List<DeviceResponse> getAll(User user, Pageable pageable) throws MqttException {
         return deviceRepository.findAllByUser(user, pageable).stream()
                 .map(deviceMapper::toDeviceResponse).toList();
     }
@@ -61,7 +66,10 @@ public class DeviceService {
         var device = deviceRepository.findByIdAndUser(id, user)
                 .orElseThrow(() -> new AppException(ErrorCode.DEVICE_NOT_EXISTED));
 
-        mqttSevice.subcribeAsync(device.getTopicSensor(), device.getTopicWatering());
+        mqttSevice.subcribeAsync(device.getTopicSensor(),
+                (topic, message) -> realtimeService.sendDataAsync(topic, message.toString()));
+        mqttSevice.subcribeAsync(device.getTopicWatering(),
+                (topic, message) -> realtimeService.sendPumpStatus(topic, message.toString()));
 
         return deviceMapper.toDeviceResponse(device);
     }
@@ -97,6 +105,14 @@ public class DeviceService {
     public List<DeviceResponse> searchByKeyword(String authHeader, String keyword, Pageable pageable) {
         return deviceRepository.findByUserAndNameContainingIgnoreCase(userService.getUser(authHeader), keyword, pageable)
                 .stream().map(deviceMapper::toDeviceResponse).toList();
+    }
+
+    public List<DataSensorResponse> getHistorySensor(String id, User user, Pageable pageable) {
+        Device device = deviceRepository.findByIdAndUser(id, user)
+                .orElseThrow(() -> new AppException(ErrorCode.DEVICE_NOT_EXISTED));
+
+        List<DataSensorHistory> histories = dataSensorHistoryRepository.findAllByDeviceOrderByTimestampDesc(device, pageable);
+        return histories.stream().map(dataSensorMapper::toDataSensorResponse).toList();
     }
 
 }

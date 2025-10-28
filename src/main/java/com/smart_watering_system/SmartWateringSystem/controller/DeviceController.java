@@ -39,7 +39,7 @@ public class DeviceController {
     @GetMapping
     ApiResponse<List<DeviceResponse>> getAllDevices(@RequestHeader("Authorization") String headerAuthorizaion,
                                                     @PageableDefault(sort = "createdAt",
-                                                            direction = Sort.Direction.DESC) Pageable pageable) {
+                                                            direction = Sort.Direction.DESC) Pageable pageable) throws MqttException {
         return ApiResponse.<List<DeviceResponse>>builder()
                 .statusCode(HttpStatus.OK.value())
                 .data(deviceService.getAll(userService.getUser(headerAuthorizaion), pageable))

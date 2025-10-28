@@ -2,8 +2,8 @@ package com.smart_watering_system.SmartWateringSystem.controller;
 
 import com.smart_watering_system.SmartWateringSystem.dto.response.ApiResponse;
 import com.smart_watering_system.SmartWateringSystem.dto.response.DataSensorResponse;
-import com.smart_watering_system.SmartWateringSystem.dto.response.WateringResponse;
-import com.smart_watering_system.SmartWateringSystem.service.SensorService;
+import com.smart_watering_system.SmartWateringSystem.service.DeviceService;
+import com.smart_watering_system.SmartWateringSystem.service.RealtimeService;
 import com.smart_watering_system.SmartWateringSystem.service.UserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class SensorController {
 
-    SensorService sensorService;
+    DeviceService deviceService;
     UserService userService;
 
     @GetMapping("/history")
@@ -31,7 +31,7 @@ public class SensorController {
                                                           @PageableDefault(size = 12, sort = "timestamp", direction = Sort.Direction.ASC) Pageable pageable) {
         return ApiResponse.<List<DataSensorResponse>>builder()
                 .statusCode(HttpStatus.OK.value())
-                .data(sensorService.getHistory(id, userService.getUser(headerAuth), pageable))
+                .data(deviceService.getHistorySensor(id, userService.getUser(headerAuth), pageable))
                 .build();
     }
 
