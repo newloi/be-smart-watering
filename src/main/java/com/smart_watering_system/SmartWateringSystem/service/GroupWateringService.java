@@ -36,15 +36,17 @@ public class GroupWateringService {
     Executor executor;
     WateringMapper wateringMapper;
     GroupWateringHistoryRepository groupWateringHistoryRepository;
+    UserService userService;
 
-    public WateringResponse doAction(String id, WateringRequest request, User user) {
+    public WateringResponse doAction(String id, WateringRequest request) {
+        var user = userService.getUser();
         Group group = groupRepository.findByIdAndUser(id, user)
                 .orElseThrow(() -> new AppException(ErrorCode.GROUP_NOT_EXISTED));
 
         group.getDevices().forEach(device -> {
             executor.execute(() -> {
                 try {
-                    deviceWateringService.doAction(device.getId(), request, user, true);
+                    deviceWateringService.doAction(device.getId(), request, true);
                 } catch (MqttException | JsonProcessingException e) {
                     throw new RuntimeException(e);
                 }
@@ -88,8 +90,8 @@ public class GroupWateringService {
 
     }
 
-    public List<WateringResponse> getAllHistories(String id, User user) {
-        Group group = groupRepository.findByIdAndUser(id, user)
+    public List<WateringResponse> getAllHistories(String id) {
+        Group group = groupRepository.findByIdAndUser(id, userService.getUser())
                 .orElseThrow(() -> new AppException(ErrorCode.GROUP_NOT_EXISTED));
 
         List<GroupWateringHistory> histories = groupWateringHistoryRepository

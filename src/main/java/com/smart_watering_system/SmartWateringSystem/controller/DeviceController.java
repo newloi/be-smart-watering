@@ -30,37 +30,33 @@ public class DeviceController {
 
     @PostMapping
     @RateLimiter(capacity = 10, refillTokens = 10, refillPeriodSeconds = 60)
-    ApiResponse<DeviceResponse> createDevice(@RequestHeader("Authorization") String headerAuthorizaion,
-                                             @RequestBody @Valid DeviceRequest request) {
+    ApiResponse<DeviceResponse> createDevice(@RequestBody @Valid DeviceRequest request) {
         return ApiResponse.<DeviceResponse>builder()
                 .statusCode(HttpStatus.CREATED.value())
-                .data(deviceService.create(request, userService.getUser(headerAuthorizaion)))
+                .data(deviceService.create(request))
                 .build();
     }
 
     @GetMapping
-    ApiResponse<List<DeviceResponse>> getAllDevices(@RequestHeader("Authorization") String headerAuthorizaion,
-                                                    @PageableDefault(sort = "createdAt",
+    ApiResponse<List<DeviceResponse>> getAllDevices(@PageableDefault(sort = "createdAt",
                                                             direction = Sort.Direction.DESC) Pageable pageable) throws MqttException {
         return ApiResponse.<List<DeviceResponse>>builder()
                 .statusCode(HttpStatus.OK.value())
-                .data(deviceService.getAll(userService.getUser(headerAuthorizaion), pageable))
+                .data(deviceService.getAll(pageable))
                 .build();
     }
 
     @GetMapping("/{id}")
-    ApiResponse<DeviceResponse> getDevice(@RequestHeader("Authorization") String headerAuthorizaion,
-                                          @PathVariable("id") String id) throws MqttException {
+    ApiResponse<DeviceResponse> getDevice(@PathVariable("id") String id) throws MqttException {
         return ApiResponse.<DeviceResponse>builder()
                 .statusCode(HttpStatus.OK.value())
-                .data(deviceService.get(id, userService.getUser(headerAuthorizaion)))
+                .data(deviceService.get(id, userService.getUser()))
                 .build();
     }
 
     @DeleteMapping("/{id}")
-    ApiResponse<Void> deleteDevice(@RequestHeader("Authorization") String headerAuthorizaion,
-                                   @PathVariable("id") String id) throws MqttException {
-        deviceService.delete(id, userService.getUser(headerAuthorizaion));
+    ApiResponse<Void> deleteDevice(@PathVariable("id") String id) throws MqttException {
+        deviceService.delete(id, userService.getUser());
 
         return ApiResponse.<Void>builder()
                 .statusCode(HttpStatus.OK.value())
@@ -68,33 +64,30 @@ public class DeviceController {
     }
 
     @PutMapping("/{id}")
-    ApiResponse<DeviceResponse> updateDevice(@RequestHeader("Authorization") String headerAuthorizaion,
-                                             @PathVariable("id") String id,
+    ApiResponse<DeviceResponse> updateDevice(@PathVariable("id") String id,
                                              @RequestBody @Valid DeviceRequest request) throws MqttException {
         return ApiResponse.<DeviceResponse>builder()
                 .statusCode(HttpStatus.OK.value())
-                .data(deviceService.update(id, request, userService.getUser(headerAuthorizaion)))
+                .data(deviceService.update(id, request, userService.getUser()))
                 .build();
     }
 
     @GetMapping("/free")
-    ApiResponse<List<DeviceResponse>> getAllFreeDevice(@RequestHeader("Authorization") String headerAuthorizaion,
-                                                       @PageableDefault(sort = "createdAt",
+    ApiResponse<List<DeviceResponse>> getAllFreeDevice(@PageableDefault(sort = "createdAt",
                                                                direction = Sort.Direction.DESC) Pageable pageable) {
         return ApiResponse.<List<DeviceResponse>>builder()
                 .statusCode(HttpStatus.OK.value())
-                .data(deviceService.getAllFree(userService.getUser(headerAuthorizaion), pageable))
+                .data(deviceService.getAllFree(pageable))
                 .build();
     }
 
     @GetMapping("/search")
-    ApiResponse<List<DeviceResponse>> searchDeviceByName(@RequestHeader("Authorization") String authHeader,
-                                                         @RequestParam("name") String keyword,
+    ApiResponse<List<DeviceResponse>> searchDeviceByName(@RequestParam("name") String keyword,
                                                          @PageableDefault(sort = "createdAt",
                                                                  direction = Sort.Direction.DESC) Pageable pageable) {
         return ApiResponse.<List<DeviceResponse>>builder()
                 .statusCode(HttpStatus.OK.value())
-                .data(deviceService.searchByKeyword(authHeader, keyword, pageable))
+                .data(deviceService.searchByKeyword(keyword, pageable))
                 .build();
     }
 

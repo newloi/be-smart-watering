@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.stereotype.Service;
@@ -51,16 +52,8 @@ public class UserService {
         return userMapper.toUserResponse(user);
     }
 
-    public User getUser(String headerAuthorization) {
-        String token = headerAuthorization.startsWith("Bearer ") ? headerAuthorization.substring(7) : headerAuthorization;
-
-        String username = null;
-        try {
-            SignedJWT signedToken = SignedJWT.parse(token);
-            username = signedToken.getJWTClaimsSet().getSubject();
-        } catch (ParseException e) {
-            throw new JwtException(e.getMessage());
-        }
+    public User getUser() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));

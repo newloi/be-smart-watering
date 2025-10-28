@@ -34,9 +34,9 @@ public class UserController {
     }
 
     @GetMapping
-    ApiResponse<UserResponse> getUser(@RequestHeader("Authorization") String headerAuthorization) {
+    ApiResponse<UserResponse> getUser() {
         return ApiResponse.<UserResponse>builder()
-                .data(userMapper.toUserResponse(userService.getUser(headerAuthorization)))
+                .data(userMapper.toUserResponse(userService.getUser()))
                 .build();
     }
 

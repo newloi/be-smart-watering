@@ -23,15 +23,13 @@ import java.util.List;
 public class SensorController {
 
     DeviceService deviceService;
-    UserService userService;
 
     @GetMapping("/history")
-    ApiResponse<List<DataSensorResponse>> getAllHistories(@RequestHeader("Authorization") String headerAuth,
-                                                          @PathVariable String id,
+    ApiResponse<List<DataSensorResponse>> getAllHistories(@PathVariable String id,
                                                           @PageableDefault(size = 12, sort = "timestamp", direction = Sort.Direction.ASC) Pageable pageable) {
         return ApiResponse.<List<DataSensorResponse>>builder()
                 .statusCode(HttpStatus.OK.value())
-                .data(deviceService.getHistorySensor(id, userService.getUser(headerAuth), pageable))
+                .data(deviceService.getHistorySensor(id, pageable))
                 .build();
     }
 

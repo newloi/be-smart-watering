@@ -36,8 +36,8 @@ public class GroupSchedulerService {
     GroupWateringService groupWateringService;
     Map<String, ScheduledFuture<?>> schedules;
 
-    public ScheduleResponse create(String id, ScheduleRequest request, String authHeader) {
-        var group = groupService.getByUser(id, authHeader);
+    public ScheduleResponse create(String id, ScheduleRequest request) {
+        var group = groupService.getById(id);
 
         var schedule = scheduleMapper.toGroupSchedule(request);
         schedule.setGroup(group);
@@ -104,8 +104,8 @@ public class GroupSchedulerService {
         runSchedule(schedule);
     }
 
-    public void delete(String authHeader, String id, String scheduleId) {
-        var group = groupService.getByUser(id, authHeader);
+    public void delete(String id, String scheduleId) {
+        var group = groupService.getById(id);
         var schedule = groupScheduleRepository.findByIdAndGroup(scheduleId, group)
                         .orElseThrow(() -> new AppException(ErrorCode.SCHEDULE_NOT_EXISTED));
 
@@ -114,8 +114,8 @@ public class GroupSchedulerService {
         groupScheduleRepository.delete(schedule);
     }
 
-    public ScheduleResponse update(String authHeader, String id, String scheduleId, ScheduleRequest request) {
-        var group = groupService.getByUser(id, authHeader);
+    public ScheduleResponse update(String id, String scheduleId, ScheduleRequest request) {
+        var group = groupService.getById(id);
         var schedule = groupScheduleRepository.findByIdAndGroup(scheduleId, group)
                 .orElseThrow(() -> new AppException(ErrorCode.SCHEDULE_NOT_EXISTED));
 
@@ -130,8 +130,8 @@ public class GroupSchedulerService {
         return scheduleMapper.toScheduleResponse(schedule);
     }
 
-    public void trigger(String authHeader, String id, String scheduleId, TriggerRequest request) {
-        var group = groupService.getByUser(id, authHeader);
+    public void trigger(String id, String scheduleId, TriggerRequest request) {
+        var group = groupService.getById(id);
         var schedule = groupScheduleRepository.findByIdAndGroup(scheduleId, group)
                 .orElseThrow(() -> new AppException(ErrorCode.SCHEDULE_NOT_EXISTED));
 
@@ -139,8 +139,8 @@ public class GroupSchedulerService {
         else if(!request.isStatus() && !schedule.isStatus()) turnOnSchedule(schedule);
     }
 
-    public List<ScheduleResponse> getAll(String id, String authHeader, Pageable pageable) {
-        var group = groupService.getByUser(id, authHeader);
+    public List<ScheduleResponse> getAll(String id, Pageable pageable) {
+        var group = groupService.getById(id);
 
         List<GroupSchedule> schedules = groupScheduleRepository.findAllByGroup(group, pageable);
         return schedules.stream().map(scheduleMapper::toScheduleResponse).toList();

@@ -26,20 +26,18 @@ public class GroupScheduleController {
     GroupSchedulerService groupSchedulerService;
 
     @PostMapping
-    public ApiResponse<ScheduleResponse> createSchedule(@RequestHeader("Authorization") String authHeader,
-                                                        @RequestBody @Valid ScheduleRequest request,
+    public ApiResponse<ScheduleResponse> createSchedule(@RequestBody @Valid ScheduleRequest request,
                                                         @PathVariable("id") String id) {
         return ApiResponse.<ScheduleResponse>builder()
                 .statusCode(HttpStatus.OK.value())
-                .data(groupSchedulerService.create(id, request, authHeader))
+                .data(groupSchedulerService.create(id, request))
                 .build();
     }
 
     @DeleteMapping("/{scheduleId}")
-    public ApiResponse<Void> deleteSchedule(@RequestHeader("Authorization") String authHeader,
-                                            @PathVariable("id") String id,
+    public ApiResponse<Void> deleteSchedule(@PathVariable("id") String id,
                                             @PathVariable("scheduleId") String scheduleId) {
-        groupSchedulerService.delete(authHeader, id, scheduleId);
+        groupSchedulerService.delete(id, scheduleId);
 
         return ApiResponse.<Void>builder()
                 .statusCode(HttpStatus.OK.value())
@@ -47,22 +45,20 @@ public class GroupScheduleController {
     }
 
     @PutMapping("/{scheduleId}")
-    public ApiResponse<ScheduleResponse> updateSchedule(@RequestHeader("Authorization") String authHeader,
-                                                        @RequestBody @Valid ScheduleRequest request,
+    public ApiResponse<ScheduleResponse> updateSchedule(@RequestBody @Valid ScheduleRequest request,
                                                         @PathVariable("id") String id,
                                                         @PathVariable("scheduleId") String scheduleId) {
         return ApiResponse.<ScheduleResponse>builder()
                 .statusCode(HttpStatus.OK.value())
-                .data(groupSchedulerService.update(authHeader, id, scheduleId, request))
+                .data(groupSchedulerService.update(id, scheduleId, request))
                 .build();
     }
 
     @PostMapping("/{scheduleId}/trigger")
-    public ApiResponse<Void> triggerSchedule(@RequestHeader("Authorization") String authHeader,
-                                             @RequestBody @Valid TriggerRequest request,
+    public ApiResponse<Void> triggerSchedule(@RequestBody @Valid TriggerRequest request,
                                              @PathVariable("id") String id,
                                              @PathVariable("scheduleId") String scheduleId) {
-        groupSchedulerService.trigger(authHeader, id, scheduleId, request);
+        groupSchedulerService.trigger(id, scheduleId, request);
 
         return ApiResponse.<Void>builder()
                 .statusCode(HttpStatus.OK.value())
@@ -70,13 +66,12 @@ public class GroupScheduleController {
     }
 
     @GetMapping
-    public ApiResponse<List<ScheduleResponse>> getAllSchedule(@RequestHeader("Authorization") String authHeader,
-                                                              @PathVariable("id") String id,
+    public ApiResponse<List<ScheduleResponse>> getAllSchedule(@PathVariable("id") String id,
                                                               @PageableDefault(sort = "createdAt",
                                                                       direction = Sort.Direction.DESC) Pageable pageable) {
         return ApiResponse.<List<ScheduleResponse>>builder()
                 .statusCode(HttpStatus.OK.value())
-                .data(groupSchedulerService.getAll(id, authHeader, pageable))
+                .data(groupSchedulerService.getAll(id, pageable))
                 .build();
     }
 
