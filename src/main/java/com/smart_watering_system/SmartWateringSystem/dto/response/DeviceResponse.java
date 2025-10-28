@@ -14,6 +14,7 @@ public class DeviceResponse {
     String id;
     String deviceId;
     String name;
+    boolean isOnline;
     String topicSensor;
     String topicWatering;
     LocalDateTime createdAt;
