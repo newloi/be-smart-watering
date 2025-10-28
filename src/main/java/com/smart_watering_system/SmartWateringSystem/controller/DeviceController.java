@@ -1,5 +1,6 @@
 package com.smart_watering_system.SmartWateringSystem.controller;
 
+import com.smart_watering_system.SmartWateringSystem.annotation.RateLimiter;
 import com.smart_watering_system.SmartWateringSystem.dto.request.DeviceRequest;
 import com.smart_watering_system.SmartWateringSystem.dto.response.ApiResponse;
 import com.smart_watering_system.SmartWateringSystem.dto.response.DeviceResponse;
@@ -28,6 +29,7 @@ public class DeviceController {
     UserService userService;
 
     @PostMapping
+    @RateLimiter(capacity = 10, refillTokens = 10, refillPeriodSeconds = 60)
     ApiResponse<DeviceResponse> createDevice(@RequestHeader("Authorization") String headerAuthorizaion,
                                              @RequestBody @Valid DeviceRequest request) {
         return ApiResponse.<DeviceResponse>builder()
@@ -47,6 +49,7 @@ public class DeviceController {
     }
 
     @GetMapping("/{id}")
+
     ApiResponse<DeviceResponse> getDevice(@RequestHeader("Authorization") String headerAuthorizaion,
                                           @PathVariable("id") String id) throws MqttException {
         return ApiResponse.<DeviceResponse>builder()

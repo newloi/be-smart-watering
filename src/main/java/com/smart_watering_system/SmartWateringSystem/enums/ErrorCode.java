@@ -128,6 +128,11 @@ public enum ErrorCode {
             "New password and confirm password must match",
             HttpStatus.BAD_REQUEST
     ),
+    TOO_MANY_REQUESTS(
+            HttpStatus.TOO_MANY_REQUESTS.value(),
+            "Too many requests. Please try again later.",
+            HttpStatus.TOO_MANY_REQUESTS
+    )
     ;
 
     int statusCode;
