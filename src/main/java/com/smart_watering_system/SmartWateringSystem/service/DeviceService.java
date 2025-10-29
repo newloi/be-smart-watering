@@ -53,8 +53,7 @@ public class DeviceService {
             throw new AppException(ErrorCode.DEVICE_EXISTED);
         }
 
-        var response = deviceMapper.toDeviceResponse(device);
-        return response;
+        return deviceMapper.toDeviceResponse(device);
     }
 
     public List<DeviceResponse> getAll(Pageable pageable) {
@@ -62,7 +61,7 @@ public class DeviceService {
                 .map(deviceMapper::toDeviceResponse).toList();
     }
 
-    @Cacheable(value = "devices", key = "#id + '-' + #user.id")
+//    @Cacheable(value = "devices", key = "#id + '-' + #user.id")
     public DeviceResponse get(String id, User user) throws MqttException {
         var device = deviceRepository.findByIdAndUser(id, user)
                 .orElseThrow(() -> new AppException(ErrorCode.DEVICE_NOT_EXISTED));
@@ -73,32 +72,22 @@ public class DeviceService {
         return deviceMapper.toDeviceResponse(device);
     }
 
-    @CacheEvict(value = "devices", key = "#id + '-' + #user.id")
-    public void delete(String id, User user) throws MqttException {
+//    @CacheEvict(value = "devices", key = "#id + '-' + #user.id")
+    public void delete(String id, User user) {
         var device = deviceRepository.findByIdAndUser(id, user)
                 .orElseThrow(() -> new AppException(ErrorCode.DEVICE_NOT_EXISTED));
-
-        mqttSevice.unsubscribeAsync(
-                new String[]{device.getTopicSensor(), device.getTopicWatering(), "status/" + device.getDeviceId()}
-        );
 
         deviceRepository.delete(device);
     }
 
-    @CachePut(value = "devices", key = "#id + '-' + #user.id")
-    public DeviceResponse update(String id, DeviceRequest request, User user) throws MqttException {
+//    @CachePut(value = "devices", key = "#id + '-' + #user.id")
+    public DeviceResponse update(String id, DeviceRequest request, User user) {
         var device = deviceRepository.findByIdAndUser(id, user)
                 .orElseThrow(() -> new AppException(ErrorCode.DEVICE_NOT_EXISTED));
 
-        if(!Objects.equals(device.getDeviceId(), request.getDeviceId())) {
-            mqttSevice.unsubscribeAsync(
-                    new String[]{device.getTopicSensor(), device.getTopicWatering(), "status/" + device.getDeviceId()}
-            );
-
-            deviceMapper.updateDevice(device, request);
-            device.setTopicSensor("sensor/" + request.getDeviceId());
-            device.setTopicWatering("watering/" + request.getDeviceId());
-        }
+        deviceMapper.updateDevice(device, request);
+        device.setTopicSensor("sensor/" + request.getDeviceId());
+        device.setTopicWatering("watering/" + request.getDeviceId());
 
         return deviceMapper.toDeviceResponse(deviceRepository.save(device));
     }

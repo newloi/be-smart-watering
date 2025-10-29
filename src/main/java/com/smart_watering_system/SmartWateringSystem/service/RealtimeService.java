@@ -45,26 +45,29 @@ public class RealtimeService {
         Device device = deviceRepository.findByDeviceId(deviceId)
                 .orElse(null);
 
-        if(device == null) return;
+        if (device == null) return;
 
-        try {
-            LocalDateTime now = LocalDateTime.now();
-            DataSensorHistory dataSensorHistory = objectMapper.readValue(payload, DataSensorHistory.class);
-            dataSensorHistory.setTimestamp(now);
-            dataSensorHistory.setDevice(device);
+        synchronized (deviceId.intern()) {
+            try {
 
-            String message = objectMapper.writeValueAsString(dataSensorMapper.toDataSensorResponse(dataSensorHistory));
-            log.info("Topic: {}, Data: {}", topic, message);
-            simpMessagingTemplate.convertAndSend("/device/" + topic, message);
+                LocalDateTime now = LocalDateTime.now();
+                DataSensorHistory dataSensorHistory = objectMapper.readValue(payload, DataSensorHistory.class);
+                dataSensorHistory.setTimestamp(now);
+                dataSensorHistory.setDevice(device);
 
-            Optional<DataSensorHistory> latest =
-                    dataSensorHistoryRepository.findTopByDeviceOrderByTimestampDesc(device);
-            LocalDateTime preTime = latest.map(DataSensorHistory::getTimestamp).orElse(null);
+                String message = objectMapper.writeValueAsString(dataSensorMapper.toDataSensorResponse(dataSensorHistory));
+                log.info("Topic: {}, Data: {}", topic, message);
+                simpMessagingTemplate.convertAndSend("/device/" + topic, message);
 
-            if (preTime == null || ChronoUnit.HOURS.between(preTime, now) >= 2)
-                dataSensorHistoryRepository.save(dataSensorHistory);
-        } catch (JsonProcessingException | MessagingException e) {
-            log.error("sendDataAsync/RealtimeService: {}", e.getMessage());
+                Optional<DataSensorHistory> latest =
+                        dataSensorHistoryRepository.findTopByDeviceOrderByTimestampDesc(device);
+                LocalDateTime preTime = latest.map(DataSensorHistory::getTimestamp).orElse(null);
+
+                if (preTime == null || ChronoUnit.HOURS.between(preTime, now) >= 2)
+                    dataSensorHistoryRepository.save(dataSensorHistory);
+            } catch (JsonProcessingException | MessagingException e) {
+                log.error("sendDataAsync/RealtimeService: {}", e.getMessage());
+            }
         }
     }
 
@@ -81,17 +84,19 @@ public class RealtimeService {
         Device device = deviceRepository.findByDeviceId(deviceId)
                 .orElse(null);
 
-        if(device == null) return;
+        if (device == null) return;
 
-        try {
-            JsonNode json = objectMapper.readTree(payload);
-            boolean isOnline = json.get("isOnline").asBoolean();
-            if(device.isOnline() != isOnline) {
-                device.setOnline(isOnline);
-                deviceRepository.save(device);
+        synchronized (deviceId.intern()){
+            try {
+                JsonNode json = objectMapper.readTree(payload);
+                boolean isOnline = json.get("isOnline").asBoolean();
+                if (device.isOnline() != isOnline) {
+                    device.setOnline(isOnline);
+                    deviceRepository.save(device);
+                }
+            } catch (JsonProcessingException e) {
+                log.error("sendDeviceStatusAsync/RealtimeService: {}", e.getMessage());
             }
-        } catch (JsonProcessingException e) {
-            log.error("sendDeviceStatusAsync/RealtimeService: {}", e.getMessage());
         }
     }
 
