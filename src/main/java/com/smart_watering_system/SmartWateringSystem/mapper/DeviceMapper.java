@@ -6,11 +6,13 @@ import com.smart_watering_system.SmartWateringSystem.entity.Device;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface DeviceMapper {
     Device toDevice(DeviceRequest request);
+    @Mapping(target = "isOnline", source = "online")
     DeviceResponse toDeviceResponse(Device device);
     void updateDevice(@MappingTarget Device device, DeviceRequest request);
 }

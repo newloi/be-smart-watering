@@ -53,7 +53,8 @@ public class DeviceService {
             throw new AppException(ErrorCode.DEVICE_EXISTED);
         }
 
-        return deviceMapper.toDeviceResponse(device);
+        var response = deviceMapper.toDeviceResponse(device);
+        return response;
     }
 
     public List<DeviceResponse> getAll(Pageable pageable) {
