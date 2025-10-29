@@ -90,12 +90,12 @@ public class GroupWateringService {
 
     }
 
-    public List<WateringResponse> getAllHistories(String id) {
+    public List<WateringResponse> getAllHistories(String id, Pageable pageable) {
         Group group = groupRepository.findByIdAndUser(id, userService.getUser())
                 .orElseThrow(() -> new AppException(ErrorCode.GROUP_NOT_EXISTED));
 
         List<GroupWateringHistory> histories = groupWateringHistoryRepository
-                .findAllByGroupOrderByStartTimeDesc(group, Pageable.ofSize(10));
+                .findAllByGroup(group, pageable);
         return histories.stream().map(wateringMapper::toWateringResponse).toList();
     }
 

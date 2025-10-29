@@ -121,7 +121,7 @@ public class DeviceService {
         Device device = deviceRepository.findByIdAndUser(id, userService.getUser())
                 .orElseThrow(() -> new AppException(ErrorCode.DEVICE_NOT_EXISTED));
 
-        List<DataSensorHistory> histories = dataSensorHistoryRepository.findAllByDeviceOrderByTimestampDesc(device, pageable);
+        List<DataSensorHistory> histories = dataSensorHistoryRepository.findAllByDevice(device, pageable);
         return histories.stream().map(dataSensorMapper::toDataSensorResponse).toList();
     }
 

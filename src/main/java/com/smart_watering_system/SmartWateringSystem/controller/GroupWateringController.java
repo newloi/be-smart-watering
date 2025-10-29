@@ -12,6 +12,9 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.eclipse.paho.client.mqttv3.MqttException;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,10 +39,13 @@ public class GroupWateringController {
     }
 
     @GetMapping("/history")
-    ApiResponse<List<WateringResponse>> getAllHistories(@PathVariable String id) {
+    ApiResponse<List<WateringResponse>> getAllHistories(@PathVariable String id,
+                                                        @PageableDefault(
+                                                                size = 10, sort = "startTime", direction = Sort.Direction.DESC
+                                                        ) Pageable pageable) {
         return ApiResponse.<List<WateringResponse>>builder()
                 .statusCode(HttpStatus.OK.value())
-                .data(groupWateringService.getAllHistories(id))
+                .data(groupWateringService.getAllHistories(id, pageable))
                 .build();
     }
 

@@ -1,6 +1,5 @@
 package com.smart_watering_system.SmartWateringSystem.repository;
 
-import com.smart_watering_system.SmartWateringSystem.entity.DeviceWateringHistory;
 import com.smart_watering_system.SmartWateringSystem.entity.Group;
 import com.smart_watering_system.SmartWateringSystem.entity.GroupWateringHistory;
 import org.springframework.data.domain.Pageable;
@@ -11,5 +10,5 @@ import java.util.List;
 
 @Repository
 public interface GroupWateringHistoryRepository extends JpaRepository<GroupWateringHistory, String> {
-    List<GroupWateringHistory> findAllByGroupOrderByStartTimeDesc(Group group, Pageable pageable);
+    List<GroupWateringHistory> findAllByGroup(Group group, Pageable pageable);
 }

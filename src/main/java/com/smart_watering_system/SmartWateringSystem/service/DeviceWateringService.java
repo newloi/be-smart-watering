@@ -6,7 +6,6 @@ import com.smart_watering_system.SmartWateringSystem.dto.request.WateringRequest
 import com.smart_watering_system.SmartWateringSystem.dto.response.WateringResponse;
 import com.smart_watering_system.SmartWateringSystem.entity.Device;
 import com.smart_watering_system.SmartWateringSystem.entity.DeviceWateringHistory;
-import com.smart_watering_system.SmartWateringSystem.entity.User;
 import com.smart_watering_system.SmartWateringSystem.enums.Action;
 import com.smart_watering_system.SmartWateringSystem.enums.ErrorCode;
 import com.smart_watering_system.SmartWateringSystem.exception.AppException;
@@ -89,12 +88,12 @@ public class DeviceWateringService {
         return WateringResponse.builder().build();
     }
 
-    public List<WateringResponse> getAllHistories(String id) {
+    public List<WateringResponse> getAllHistories(String id, Pageable pageable) {
         Device device = deviceRepository.findByIdAndUser(id, userService.getUser())
                 .orElseThrow(() -> new AppException(ErrorCode.DEVICE_NOT_EXISTED));
 
         List<DeviceWateringHistory> histories = deviceWateringHistoryRepository
-                .findAllByDeviceOrderByStartTimeDesc(device, Pageable.ofSize(10));
+                .findAllByDevice(device, pageable);
         return histories.stream().map(wateringMapper::toWateringResponse).toList();
     }
 

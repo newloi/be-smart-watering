@@ -16,7 +16,6 @@ import java.util.Optional;
 public interface GroupRepository extends JpaRepository<Group, String> {
     List<Group> findAllByUser(User user, Pageable pageable);
     Optional<Group> findByIdAndUser(String id, User user);
-    void deleteByIdAndUser(String id, User user);
 
     @Query("SELECT g FROM Group g LEFT JOIN FETCH g.histories WHERE g.id = :id")
     Group findByIdWithHistories(@Param("id") String id);

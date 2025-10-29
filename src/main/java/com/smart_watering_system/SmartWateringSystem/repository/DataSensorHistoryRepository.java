@@ -12,5 +12,5 @@ import java.util.Optional;
 @Repository
 public interface DataSensorHistoryRepository extends JpaRepository<DataSensorHistory, String> {
     Optional<DataSensorHistory> findTopByDeviceOrderByTimestampDesc(Device device);
-    List<DataSensorHistory> findAllByDeviceOrderByTimestampDesc(Device device, Pageable pageable);
+    List<DataSensorHistory> findAllByDevice(Device device, Pageable pageable);
 }

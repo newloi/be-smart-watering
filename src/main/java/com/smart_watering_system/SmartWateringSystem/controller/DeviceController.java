@@ -37,7 +37,7 @@ public class DeviceController {
 
     @GetMapping
     ApiResponse<List<DeviceResponse>> getAllDevices(@PageableDefault(sort = "createdAt",
-                                                            direction = Sort.Direction.DESC) Pageable pageable) throws MqttException {
+                                                            direction = Sort.Direction.DESC) Pageable pageable) {
         return ApiResponse.<List<DeviceResponse>>builder()
                 .statusCode(HttpStatus.OK.value())
                 .data(deviceService.getAll(pageable))

@@ -10,5 +10,5 @@ import java.util.List;
 
 @Repository
 public interface DeviceWateringHistoryRepository extends JpaRepository<DeviceWateringHistory, String> {
-    List<DeviceWateringHistory> findAllByDeviceOrderByStartTimeDesc(Device device, Pageable pageable);
+    List<DeviceWateringHistory> findAllByDevice(Device device, Pageable pageable);
 }
