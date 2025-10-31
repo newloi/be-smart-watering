@@ -67,7 +67,7 @@ public class DeviceService {
                 .orElseThrow(() -> new AppException(ErrorCode.DEVICE_NOT_EXISTED));
 
         mqttSevice.subcribeAsync(device.getTopicWatering(),
-                (topic, message) -> realtimeService.sendPumpStatus(topic, message.toString()));
+                (topic, message) -> realtimeService.sendPumpStatusAsync(topic, message.toString()));
 
         return deviceMapper.toDeviceResponse(device);
     }
