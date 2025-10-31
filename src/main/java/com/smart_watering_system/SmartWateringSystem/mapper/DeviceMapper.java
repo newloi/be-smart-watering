@@ -13,6 +13,7 @@ import org.mapstruct.MappingTarget;
 public interface DeviceMapper {
     Device toDevice(DeviceRequest request);
     @Mapping(target = "isOnline", source = "online")
+    @Mapping(target = "isWatering", source = "watering")
     DeviceResponse toDeviceResponse(Device device);
     void updateDevice(@MappingTarget Device device, DeviceRequest request);
 }

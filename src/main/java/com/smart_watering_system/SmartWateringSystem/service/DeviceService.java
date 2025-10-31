@@ -33,11 +33,9 @@ public class DeviceService {
 
     DeviceRepository deviceRepository;
     DeviceMapper deviceMapper;
-    MqttSevice mqttSevice;
     UserService userService;
     DataSensorHistoryRepository dataSensorHistoryRepository;
     DataSensorMapper dataSensorMapper;
-    RealtimeService realtimeService;
 
     public DeviceResponse create(DeviceRequest request) {
         var device = deviceMapper.toDevice(request);
@@ -65,9 +63,6 @@ public class DeviceService {
     public DeviceResponse get(String id, User user) throws MqttException {
         var device = deviceRepository.findByIdAndUser(id, user)
                 .orElseThrow(() -> new AppException(ErrorCode.DEVICE_NOT_EXISTED));
-
-        mqttSevice.subcribeAsync(device.getTopicWatering(),
-                (topic, message) -> realtimeService.sendPumpStatusAsync(topic, message.toString()));
 
         return deviceMapper.toDeviceResponse(device);
     }

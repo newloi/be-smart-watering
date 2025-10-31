@@ -3,12 +3,11 @@ package com.smart_watering_system.SmartWateringSystem.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.nimbusds.jose.shaded.gson.JsonObject;
 import com.smart_watering_system.SmartWateringSystem.entity.DataSensorHistory;
 import com.smart_watering_system.SmartWateringSystem.entity.Device;
+import com.smart_watering_system.SmartWateringSystem.enums.ErrorCode;
+import com.smart_watering_system.SmartWateringSystem.exception.AppException;
 import com.smart_watering_system.SmartWateringSystem.mapper.DataSensorMapper;
 import com.smart_watering_system.SmartWateringSystem.repository.DataSensorHistoryRepository;
 import com.smart_watering_system.SmartWateringSystem.repository.DeviceRepository;
@@ -19,16 +18,11 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.messaging.simp.user.SimpSubscription;
-import org.springframework.messaging.simp.user.SimpUser;
-import org.springframework.messaging.simp.user.SimpUserRegistry;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
-import java.util.concurrent.Executor;
 
 @Slf4j
 @Service
@@ -41,11 +35,9 @@ public class RealtimeService {
     DataSensorHistoryRepository dataSensorHistoryRepository;
     DataSensorMapper dataSensorMapper;
     ObjectMapper objectMapper;
-    SimpUserRegistry simpUserRegistry;
 
-    //    @Async
     @Transactional
-    public void sendDataAsync(String topic, String payload) {
+    public void sendData(String topic, String payload) {
         String[] spliter = topic.split("/");
 
         String deviceId = spliter[1];
@@ -65,26 +57,10 @@ public class RealtimeService {
                 var response = dataSensorMapper.toDataSensorResponse(dataSensorHistory);
                 response.setDeviceId(deviceId);
 
-                String message = objectMapper.writeValueAsString(response);
-                log.info("Topic: {}, Data: {}", topic, message);
-
-                // ---------
-                String username = device.getUser().getUsername();
-                SimpUser simpUser = simpUserRegistry.getUser(username);
-                if (simpUser == null) {
-                    log.error("USER NOT FOUND IN SIMP REGISTRY. Cannot send private message to {}.", username);
-                    return;
-                }
-
-                log.info("User {} found with {} sessions.", username, simpUser.getSessions().size());
-
-                for (SimpSubscription subscription : simpUser.getSessions().iterator().next().getSubscriptions()) {
-                    log.info("Subscription Destination: {}", subscription.getDestination());
-                }
-                // ---------
-
-                simpMessagingTemplate.convertAndSendToUser(
-                        device.getUser().getUsername(), "/queue/sensor", message);
+                sendMessageTo(
+                        device.getUser().getUsername(),
+                        objectMapper.writeValueAsString(response),
+                        "/devices/sensor", "/device/" + device.getTopicSensor());
 
                 Optional<DataSensorHistory> latest =
                         dataSensorHistoryRepository.findTopByDeviceOrderByTimestampDesc(device);
@@ -93,13 +69,14 @@ public class RealtimeService {
                 if (preTime == null || ChronoUnit.HOURS.between(preTime, now) >= 2)
                     dataSensorHistoryRepository.save(dataSensorHistory);
             } catch (JsonProcessingException | MessagingException e) {
-                log.error("sendDataAsync/RealtimeService: {}", e.getMessage());
+                log.error("RealtimeService.sendData: {}", e.getMessage());
+                throw new AppException(ErrorCode.SERVER_ERROR);
             }
         }
     }
 
-    @Async
-    public void sendPumpStatusAsync(String topic, String payload) {
+    @Transactional
+    public void sendPumpStatus(String topic, String payload) {
         String[] spliter = topic.split("/");
         String deviceId = spliter[1];
         Device device = deviceRepository.findByDeviceId(deviceId)
@@ -107,25 +84,32 @@ public class RealtimeService {
 
         if (device == null) return;
 
-        try {
-            JsonNode json = objectMapper.readTree(payload);
-            if (json instanceof ObjectNode objectNode) {
-                objectNode.put("deviceId", deviceId);
-            }
-            simpMessagingTemplate.convertAndSendToUser(
-                    device.getUser().getUsername(),
-                    "/devices/pump/status",
-                    objectMapper.writeValueAsString(json)
-            );
-        } catch (JsonProcessingException e) {
-            log.error("RealtimeService.sendPumpStatusAsync: {}", e.getMessage());
-        }
+        synchronized (deviceId.intern()) {
+            try {
+                JsonNode json = objectMapper.readTree(payload);
 
-        simpMessagingTemplate.convertAndSend("/device/" + topic, payload);
+                boolean isWatering = json.get("isWatering").asBoolean();
+                if (device.isWatering() != isWatering) {
+                    device.setWatering(isWatering);
+                    deviceRepository.save(device);
+                }
+
+                if (json instanceof ObjectNode objectNode) {
+                    objectNode.put("deviceId", deviceId);
+                }
+                sendMessageTo(
+                        device.getUser().getUsername(),
+                        objectMapper.writeValueAsString(json),
+                        "/devices/watering", "/device/" + device.getTopicWatering());
+            } catch (JsonProcessingException e) {
+                log.error("RealtimeService.sendPumpStatus: {}", e.getMessage());
+                throw new AppException(ErrorCode.SERVER_ERROR);
+            }
+        }
     }
 
-    @Async
-    public void sendDeviceStatusAsync(String topic, String payload) {
+    @Transactional
+    public void sendDeviceStatus(String topic, String payload) {
         String[] spliter = topic.split("/");
         String deviceId = spliter[1];
         Device device = deviceRepository.findByDeviceId(deviceId)
@@ -146,14 +130,20 @@ public class RealtimeService {
                 if (json instanceof ObjectNode objectNode) {
                     objectNode.put("deviceId", deviceId);
                 }
-                simpMessagingTemplate.convertAndSendToUser(
+                sendMessageTo(
                         device.getUser().getUsername(),
-                        "/devices/status",
-                        objectMapper.writeValueAsString(json)
-                );
+                        objectMapper.writeValueAsString(json),
+                        "/devices/status", "/device/status/" + deviceId);
             } catch (JsonProcessingException e) {
-                log.error("RealtimeService.sendDeviceStatusAsync: {}", e.getMessage());
+                log.error("RealtimeService.sendDeviceStatus: {}", e.getMessage());
+                throw new AppException(ErrorCode.SERVER_ERROR);
             }
+        }
+    }
+
+    private void sendMessageTo(String user, String message, String ...destinations) {
+        for(var des : destinations) {
+            simpMessagingTemplate.convertAndSendToUser(user, des, message);
         }
     }
 

@@ -128,6 +128,11 @@ public enum ErrorCode {
             "New password and confirm password must match",
             HttpStatus.BAD_REQUEST
     ),
+    SERVER_ERROR(
+            HttpStatus.INTERNAL_SERVER_ERROR.value(),
+            "Internal server error",
+            HttpStatus.INTERNAL_SERVER_ERROR
+    ),
     ;
 
     int statusCode;

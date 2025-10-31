@@ -17,6 +17,7 @@ public class DeviceResponse {
     String topicSensor;
     String topicWatering;
     boolean isOnline;
+    boolean isWatering;
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
 }

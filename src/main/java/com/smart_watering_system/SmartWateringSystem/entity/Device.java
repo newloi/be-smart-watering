@@ -34,6 +34,7 @@ public class Device {
     String topicSensor;
     String topicWatering;
     boolean isOnline;
+    boolean isWatering;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)

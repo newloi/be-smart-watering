@@ -2,6 +2,7 @@ package com.smart_watering_system.SmartWateringSystem.configuration;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jwt.SignedJWT;
+import com.smart_watering_system.SmartWateringSystem.enums.ErrorCode;
 import com.smart_watering_system.SmartWateringSystem.exception.AppException;
 import com.smart_watering_system.SmartWateringSystem.service.TokenService;
 import lombok.AccessLevel;
@@ -14,6 +15,7 @@ import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
+import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -32,7 +34,7 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
-        var accessor = StompHeaderAccessor.wrap(message);
+        var accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
         if(StompCommand.CONNECT.equals(accessor.getCommand())) {
             String authHeader = accessor.getFirstNativeHeader("Authorization");
@@ -44,12 +46,10 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
                 String username = signedJWT.getJWTClaimsSet().getSubject();
                 Authentication auth = new UsernamePasswordAuthenticationToken(username, null, List.of());
                 accessor.setUser(auth);
-                log.info("Username: {}", accessor.getUser().getName());
             } catch (AppException e) {
                 throw new MessagingException(e.getErrorCode().getMessage());
             } catch (JOSEException | ParseException e) {
-                log.error("AuthChannelInterceptor.preSend: {}", e.getMessage());
-                throw new RuntimeException(e);
+                throw new MessagingException(ErrorCode.INVALID_TOKEN.getMessage());
             }
         }
 
