@@ -62,6 +62,8 @@ public class RealtimeService {
                         objectMapper.writeValueAsString(response),
                         "/devices/sensor", "/device/" + device.getTopicSensor());
 
+
+
                 Optional<DataSensorHistory> latest =
                         dataSensorHistoryRepository.findTopByDeviceOrderByTimestampDesc(device);
                 LocalDateTime preTime = latest.map(DataSensorHistory::getTimestamp).orElse(null);

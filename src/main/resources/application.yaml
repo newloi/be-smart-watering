@@ -22,11 +22,6 @@ spring:
   mail:
     username: smartwateringorg@gmail.com
 
-  cache:
-    type: caffeine
-    caffeine:
-      spec: initialCapacity=50,maximumSize=500,expireAfterAccess=5m
-
 jwt:
   signerKey: ${SIGNER_KEY}
   accessDuration: 3600
