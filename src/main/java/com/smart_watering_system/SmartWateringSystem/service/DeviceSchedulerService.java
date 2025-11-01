@@ -147,4 +147,11 @@ public class DeviceSchedulerService {
         return schedules.stream().map(scheduleMapper::toScheduleResponse).toList();
     }
 
+    public ScheduleResponse get(String id, String scheduleId) {
+        var device = deviceService.getById(id);
+        var schedule = deviceScheduleRepository.findByIdAndDevice(scheduleId, device)
+                .orElseThrow(() -> new AppException(ErrorCode.SCHEDULE_NOT_EXISTED));
+        return scheduleMapper.toScheduleResponse(schedule);
+    }
+
 }

@@ -75,4 +75,13 @@ public class DeviceScheduleController {
                 .build();
     }
 
+    @GetMapping("/{scheduleId}")
+    public ApiResponse<ScheduleResponse> getSchedule(@PathVariable("id") String id,
+                                                     @PathVariable("scheduleId") String scheduleId) {
+        return ApiResponse.<ScheduleResponse>builder()
+                .statusCode(HttpStatus.OK.value())
+                .data(deviceSchedulerService.get(id, scheduleId))
+                .build();
+    }
+
 }

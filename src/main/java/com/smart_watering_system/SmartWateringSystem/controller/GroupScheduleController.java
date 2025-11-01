@@ -75,4 +75,13 @@ public class GroupScheduleController {
                 .build();
     }
 
+    @GetMapping("/{scheduleId}")
+    public ApiResponse<ScheduleResponse> getSchedule(@PathVariable("id") String id,
+                                                     @PathVariable("scheduleId") String scheduleId) {
+        return ApiResponse.<ScheduleResponse>builder()
+                .statusCode(HttpStatus.OK.value())
+                .data(groupSchedulerService.get(id, scheduleId))
+                .build();
+    }
+
 }
