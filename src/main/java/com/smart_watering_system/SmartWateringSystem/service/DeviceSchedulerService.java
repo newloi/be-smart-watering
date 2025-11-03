@@ -13,6 +13,7 @@ import com.smart_watering_system.SmartWateringSystem.repository.DeviceScheduleRe
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
@@ -25,6 +26,7 @@ import java.util.Objects;
 import java.util.concurrent.ScheduledFuture;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -96,14 +98,13 @@ public class DeviceSchedulerService {
         if(!schedule.isStatus()) return;
 
         schedules.get(schedule.getId()).cancel(true);
+        schedules.remove(schedule.getId());
         schedule.setStatus(false);
         deviceScheduleRepository.save(schedule);
     }
 
     public void turnOnSchedule(DeviceSchedule schedule) {
         if(schedule.isStatus()) return;
-
-        schedules.get(schedule.getId()).cancel(true);
 
         schedule.setStatus(true);
         schedule = deviceScheduleRepository.save(schedule);

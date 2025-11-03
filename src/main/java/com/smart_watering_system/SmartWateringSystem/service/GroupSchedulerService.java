@@ -90,14 +90,13 @@ public class GroupSchedulerService {
         if(!schedule.isStatus()) return;
 
         schedules.get(schedule.getId()).cancel(true);
+        schedules.remove(schedule.getId());
         schedule.setStatus(false);
         groupScheduleRepository.save(schedule);
     }
 
     public void turnOnSchedule(GroupSchedule schedule) {
         if(schedule.isStatus()) return;
-
-        schedules.get(schedule.getId()).cancel(true);
 
         schedule.setStatus(true);
         schedule = groupScheduleRepository.save(schedule);
