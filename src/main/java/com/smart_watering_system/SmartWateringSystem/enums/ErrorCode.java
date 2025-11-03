@@ -14,7 +14,8 @@ public enum ErrorCode {
             HttpStatus.CONFLICT.value(),
             "User has been existed",
             HttpStatus.CONFLICT
-    ),EMAIL_USED(
+    ),
+    EMAIL_USED(
             HttpStatus.CONFLICT.value(),
             "Email is already in use",
             HttpStatus.CONFLICT
@@ -133,6 +134,11 @@ public enum ErrorCode {
             "Internal server error",
             HttpStatus.INTERNAL_SERVER_ERROR
     ),
+    DAYS_OF_WEEK_EMPTY(
+            HttpStatus.BAD_REQUEST.value(),
+            "daysofWeek is required for schedule type DAYS",
+            HttpStatus.BAD_REQUEST
+    )
     ;
 
     int statusCode;
