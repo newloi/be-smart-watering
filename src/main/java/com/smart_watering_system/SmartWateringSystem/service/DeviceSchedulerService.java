@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ScheduledFuture;
 import java.util.stream.Collectors;
 
@@ -35,9 +36,13 @@ public class DeviceSchedulerService {
     TaskScheduler taskScheduler;
     DeviceWateringService deviceWateringService;
     Map<String, ScheduledFuture<?>> schedules;
-    UserService userService;
 
     public ScheduleResponse create(String id, ScheduleRequest request) {
+        if(request.getRepeatType() == Repeat.DAYS) {
+            List<Day> days = request.getDaysOfWeek();
+            if(Objects.isNull(days) || days.isEmpty()) throw new AppException(ErrorCode.DAYS_OF_WEEK_EMPTY);
+        }
+
         var device = deviceService.getById(id);
 
         var schedule = scheduleMapper.toDeviceSchedule(request);
@@ -116,6 +121,11 @@ public class DeviceSchedulerService {
     }
 
     public ScheduleResponse update(String id, String scheduleId, ScheduleRequest request) {
+        if(request.getRepeatType() == Repeat.DAYS) {
+            List<Day> days = request.getDaysOfWeek();
+            if(Objects.isNull(days) || days.isEmpty()) throw new AppException(ErrorCode.DAYS_OF_WEEK_EMPTY);
+        }
+
         var device = deviceService.getById(id);
         var schedule = deviceScheduleRepository.findByIdAndDevice(scheduleId, device)
                 .orElseThrow(() -> new AppException(ErrorCode.SCHEDULE_NOT_EXISTED));
