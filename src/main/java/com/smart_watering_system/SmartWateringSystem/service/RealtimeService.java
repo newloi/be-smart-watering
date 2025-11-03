@@ -38,6 +38,7 @@ public class RealtimeService {
 
     @Transactional
     public void sendData(String topic, String payload) {
+        log.info("Received: {}", payload);
         String[] spliter = topic.split("/");
 
         String deviceId = spliter[1];
@@ -68,8 +69,10 @@ public class RealtimeService {
                         dataSensorHistoryRepository.findTopByDeviceOrderByTimestampDesc(device);
                 LocalDateTime preTime = latest.map(DataSensorHistory::getTimestamp).orElse(null);
 
-                if (preTime == null || ChronoUnit.HOURS.between(preTime, now) >= 2)
+                if (preTime == null || ChronoUnit.HOURS.between(preTime, now) >= 2) {
                     dataSensorHistoryRepository.save(dataSensorHistory);
+                    log.info("saved: {}", payload);
+                }
             } catch (JsonProcessingException | MessagingException e) {
                 log.error("RealtimeService.sendData: {}", e.getMessage());
                 throw new AppException(ErrorCode.SERVER_ERROR);
@@ -146,6 +149,7 @@ public class RealtimeService {
     private void sendMessageTo(String user, String message, String ...destinations) {
         for(var des : destinations) {
             simpMessagingTemplate.convertAndSendToUser(user, des, message);
+            log.info("Sent: {}", message);
         }
     }
 

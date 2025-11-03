@@ -45,6 +45,7 @@ public class MqttConfig {
         connectOptions.setCleanSession(true);
         connectOptions.setAutomaticReconnect(true);
         connectOptions.setConnectionTimeout(10);
+        connectOptions.setKeepAliveInterval(120);
 
         client.connect(connectOptions);
         client.setCallback(new MqttCallbackExtended() {
