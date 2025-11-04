@@ -37,9 +37,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        long heartBeat = 7200L;
-        registry.enableSimpleBroker("/devices", "/device")
-                .setHeartbeatValue(new long[]{heartBeat, heartBeat});
+        registry.enableSimpleBroker("/devices", "/device");
     }
 
     @Override
