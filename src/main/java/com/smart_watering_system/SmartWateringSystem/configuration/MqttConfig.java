@@ -42,7 +42,7 @@ public class MqttConfig {
         MqttConnectOptions connectOptions = new MqttConnectOptions();
         connectOptions.setUserName(username);
         connectOptions.setPassword(password.toCharArray());
-        connectOptions.setCleanSession(true);
+        connectOptions.setCleanSession(false);
         connectOptions.setAutomaticReconnect(true);
         connectOptions.setConnectionTimeout(10);
         connectOptions.setKeepAliveInterval(120);
