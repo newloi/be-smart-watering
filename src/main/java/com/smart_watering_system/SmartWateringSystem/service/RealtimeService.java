@@ -129,7 +129,8 @@ public class RealtimeService {
                 boolean isOnline = json.get("isOnline").asBoolean();
                 if (device.isOnline() != isOnline) {
                     device.setOnline(isOnline);
-                    deviceRepository.save(device);
+                    if(!isOnline) device.setWatering(false);
+                    device = deviceRepository.save(device);
                 }
 
                 if (json instanceof ObjectNode objectNode) {

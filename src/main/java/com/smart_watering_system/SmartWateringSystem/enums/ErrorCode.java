@@ -138,6 +138,11 @@ public enum ErrorCode {
             HttpStatus.BAD_REQUEST.value(),
             "daysofWeek is required for schedule type DAYS",
             HttpStatus.BAD_REQUEST
+    ),
+    DEVICE_OFFLINE(
+            HttpStatus.BAD_REQUEST.value(),
+            "Device offline",
+            HttpStatus.BAD_REQUEST
     )
     ;
 

@@ -44,6 +44,11 @@ public class DeviceWateringService {
         Device device = deviceRepository.findByIdAndUser(id, userService.getUser())
                 .orElseThrow(() -> new AppException(ErrorCode.DEVICE_NOT_EXISTED));
 
+        if(!device.isOnline()) {
+            if(byGroup) return new WateringResponse();
+            else throw new AppException(ErrorCode.DEVICE_OFFLINE);
+        }
+
         Action action = request.getAction();
         DeviceWateringHistory recentWatering = device.getHistories().isEmpty() ? null : device.getHistories().getFirst();
         boolean isRunning = !Objects.isNull(recentWatering) && LocalDateTime.now().isBefore(recentWatering.getStartTime()
@@ -99,6 +104,9 @@ public class DeviceWateringService {
 
     public void runByScheduler(String id, long duration, boolean byGroup) {
         Device device = deviceRepository.findByIdWithHistories(id);
+
+        if(!device.isOnline()) return;
+
         DeviceWateringHistory recentWatering = device.getHistories().isEmpty() ? null : device.getHistories().getFirst();
         boolean isRunning = !Objects.isNull(recentWatering) && LocalDateTime.now().isBefore(recentWatering.getStartTime()
                 .plusSeconds(recentWatering.getDuration()));
