@@ -54,7 +54,7 @@ public class GroupService {
         });
 
         var groupDetailResponse = groupMapper.toGroupDetailResponse(group);
-        groupDetailResponse.setDevices(devices.stream().map(device -> deviceMapper.toDeviceResponse(device)).toList());
+        groupDetailResponse.setDevices(devices.stream().map(deviceMapper::toDeviceResponse).toList());
 
         return groupDetailResponse;
     }

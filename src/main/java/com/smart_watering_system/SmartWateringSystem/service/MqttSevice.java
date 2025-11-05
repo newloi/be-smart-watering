@@ -30,9 +30,4 @@ public class MqttSevice {
         mqttClient.publish(topic, mqttMessage);
     }
 
-    @Async
-    public void unsubscribeAsync(String[] topic) throws MqttException {
-        mqttClient.unsubscribe(topic);
-    }
-
 }

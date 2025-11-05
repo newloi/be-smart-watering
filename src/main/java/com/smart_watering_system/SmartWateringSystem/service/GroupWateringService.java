@@ -56,8 +56,7 @@ public class GroupWateringService {
         Action action = request.getAction();
         GroupWateringHistory recentWatering = group.getHistories().isEmpty() ? null : group.getHistories().getFirst();
         boolean isRunning = !Objects.isNull(recentWatering)
-                ? LocalDateTime.now().isBefore(recentWatering.getStartTime().plusSeconds(recentWatering.getDuration()))
-                : false;
+                && LocalDateTime.now().isBefore(recentWatering.getStartTime().plusSeconds(recentWatering.getDuration()));
 
         if (action == Action.START) {
             if (!isRunning) {

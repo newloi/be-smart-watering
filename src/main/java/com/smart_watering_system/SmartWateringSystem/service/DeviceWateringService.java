@@ -38,10 +38,9 @@ public class DeviceWateringService {
     DeviceRepository deviceRepository;
     UserService userService;
 
-    @Transactional
     public WateringResponse doAction(String id, WateringRequest request, boolean byGroup)
             throws MqttException, JsonProcessingException {
-        Device device = deviceRepository.findByIdAndUser(id, userService.getUser())
+        Device device = deviceRepository.findByIdAndUserWithHistories(id, userService.getUser())
                 .orElseThrow(() -> new AppException(ErrorCode.DEVICE_NOT_EXISTED));
 
         if(!device.isOnline()) {
