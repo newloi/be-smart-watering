@@ -38,7 +38,7 @@ public class MqttConfig {
 
     @Bean
     MqttClient mqttClient() throws MqttException {
-        MqttClient client = new MqttClient(broker, clientId, new MemoryPersistence());
+        MqttClient client = new MqttClient(broker, clientId + UUID.randomUUID(), new MemoryPersistence());
 
         MqttConnectOptions connectOptions = new MqttConnectOptions();
         connectOptions.setUserName(username);
