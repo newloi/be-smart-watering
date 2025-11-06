@@ -79,7 +79,6 @@ public class RealtimeService {
                 }
             } catch (JsonProcessingException | MessagingException e) {
                 log.error("RealtimeService.sendData: {}", e.getMessage());
-                throw new AppException(ErrorCode.SERVER_ERROR);
             }
         }
     }
@@ -87,7 +86,7 @@ public class RealtimeService {
     @Transactional
     public void sendPumpStatus(String topic, String payload) {
         String[] spliter = topic.split("/");
-        String deviceId = spliter[1];
+        String deviceId = spliter[2];
         Device device = deviceRepository.findByDeviceId(deviceId)
                 .orElse(null);
 
@@ -112,7 +111,6 @@ public class RealtimeService {
                         "/devices/watering", "/device/" + device.getTopicWatering());
             } catch (JsonProcessingException e) {
                 log.error("RealtimeService.sendPumpStatus: {}", e.getMessage());
-                throw new AppException(ErrorCode.SERVER_ERROR);
             }
         }
     }
@@ -151,12 +149,8 @@ public class RealtimeService {
                         device.getUser().getUsername(),
                         objectMapper.writeValueAsString(json),
                         "/devices/status", "/device/status/" + deviceId);
-            } catch (JsonProcessingException e) {
+            } catch (JsonProcessingException | MqttException e) {
                 log.error("RealtimeService.sendDeviceStatus: {}", e.getMessage());
-                throw new AppException(ErrorCode.SERVER_ERROR);
-            } catch (MqttException e) {
-                log.error("RealtimeService.sendDeviceStatus: {}", e.getMessage());
-                throw new RuntimeException(e);
             }
         }
     }
