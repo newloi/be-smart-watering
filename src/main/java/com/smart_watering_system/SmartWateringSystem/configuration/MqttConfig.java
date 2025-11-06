@@ -33,54 +33,22 @@ public class MqttConfig {
     @Value("${mqtt.password}")
     String password;
 
-    @Autowired
-    RealtimeService realtimeService;
-
     @Bean
     MqttClient mqttClient() throws MqttException {
-        MqttClient client = new MqttClient(broker, clientId + UUID.randomUUID(), new MemoryPersistence());
+        MqttClient client = new MqttClient(broker, clientId, new MemoryPersistence());
 
         MqttConnectOptions connectOptions = new MqttConnectOptions();
         connectOptions.setUserName(username);
         connectOptions.setPassword(password.toCharArray());
-        connectOptions.setCleanSession(true);
+        connectOptions.setCleanSession(false);
         connectOptions.setAutomaticReconnect(true);
         connectOptions.setConnectionTimeout(10);
-        connectOptions.setKeepAliveInterval(30);
+        connectOptions.setKeepAliveInterval(120);
 
         client.setCallback(new MqttCallbackExtended() {
             @Override
             public void connectComplete(boolean reconnect, String serverURI) {
                 log.info("✅ MQTT connected to: {}", serverURI);
-                try {
-//                    mqttSevice.subcribeAsync("status/#",
-//                            (topic, message) -> realtimeService.sendDeviceStatus(topic, message.toString()));
-                    client.subscribe("status/#", (topic, message) ->
-                            realtimeService.sendDeviceStatus(topic, message.toString()));
-                } catch (MqttException e) {
-                    log.error("subscribe status/# failed: {}", e.getMessage());
-                    throw new RuntimeException(e);
-                }
-
-                try {
-//                    mqttSevice.subcribeAsync("sensor/#",
-//                            (topic, message) -> realtimeService.sendData(topic, message.toString()));
-                    client.subscribe("sensor/#", (topic, message) ->
-                            realtimeService.sendData(topic, message.toString()));
-                } catch (MqttException e) {
-                    log.error("subscribe sensor/# failed: {}", e.getMessage());
-                    throw new RuntimeException(e);
-                }
-
-                try {
-//                    mqttSevice.subcribeAsync("watering/#",
-//                            (topic, message) -> realtimeService.sendPumpStatus(topic, message.toString()));
-                    client.subscribe("watering/status/#", (topic, message) ->
-                            realtimeService.sendPumpStatus(topic, message.toString()));
-                } catch (MqttException e) {
-                    log.error("subscribe watering/# failed: {}", e.getMessage());
-                    throw new RuntimeException(e);
-                }
             }
 
             @Override

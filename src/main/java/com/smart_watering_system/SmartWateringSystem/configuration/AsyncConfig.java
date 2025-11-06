@@ -14,7 +14,7 @@ import java.util.concurrent.Executors;
 public class AsyncConfig {
 
     @Bean
-    public Executor executor() {
+    public Executor taskExecutor() {
         return new DelegatingSecurityContextExecutor(Executors.newVirtualThreadPerTaskExecutor());
     }
 

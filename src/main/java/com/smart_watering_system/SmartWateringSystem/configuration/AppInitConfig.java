@@ -26,16 +26,18 @@ public class AppInitConfig {
     ApplicationRunner applicationRunner(DeviceScheduleRepository deviceScheduleRepository,
                                         DeviceSchedulerService deviceSchedulerService,
                                         GroupScheduleRepository groupScheduleRepository,
-                                        GroupSchedulerService groupSchedulerService) {
+                                        GroupSchedulerService groupSchedulerService,
+                                        MqttSevice mqttSevice,
+                                        RealtimeService realtimeService) {
         return args -> {
-//            mqttSevice.subcribeAsync("status/#",
-//                    (topic, message) -> realtimeService.sendDeviceStatus(topic, message.toString()));
-//
-//            mqttSevice.subcribeAsync("sensor/#",
-//                    (topic, message) -> realtimeService.sendData(topic, message.toString()));
-//
-//            mqttSevice.subcribeAsync("watering/#",
-//                    (topic, message) -> realtimeService.sendPumpStatus(topic, message.toString()));
+            mqttSevice.subcribeAsync("status/#",
+                    (topic, message) -> realtimeService.sendDeviceStatus(topic, message.toString()));
+
+            mqttSevice.subcribeAsync("sensor/#",
+                    (topic, message) -> realtimeService.sendData(topic, message.toString()));
+
+            mqttSevice.subcribeAsync("watering/status/#",
+                    (topic, message) -> realtimeService.sendPumpStatus(topic, message.toString()));
 
             List<DeviceSchedule> deviceSchedules = deviceScheduleRepository.findAll();
             deviceSchedules.forEach(deviceSchedulerService::runSchedule);

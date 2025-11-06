@@ -4,8 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.smart_watering_system.SmartWateringSystem.dto.request.WateringRequest;
 import com.smart_watering_system.SmartWateringSystem.entity.DataSensorHistory;
 import com.smart_watering_system.SmartWateringSystem.entity.Device;
+import com.smart_watering_system.SmartWateringSystem.enums.Action;
 import com.smart_watering_system.SmartWateringSystem.enums.ErrorCode;
 import com.smart_watering_system.SmartWateringSystem.exception.AppException;
 import com.smart_watering_system.SmartWateringSystem.mapper.DataSensorMapper;
@@ -16,6 +18,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.paho.client.mqttv3.MqttException;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -35,6 +38,7 @@ public class RealtimeService {
     DataSensorHistoryRepository dataSensorHistoryRepository;
     DataSensorMapper dataSensorMapper;
     ObjectMapper objectMapper;
+    DeviceWateringService deviceWateringService;
 
     @Transactional
     public void sendData(String topic, String payload) {
@@ -129,7 +133,14 @@ public class RealtimeService {
                 boolean isOnline = json.get("isOnline").asBoolean();
                 if (device.isOnline() != isOnline) {
                     device.setOnline(isOnline);
-                    if(!isOnline && device.isWatering()) device.setWatering(false);
+                    if(!isOnline && device.isWatering()) {
+                        WateringRequest request = WateringRequest.builder()
+                                .action(Action.STOP)
+                                .duration(0)
+                                .build();
+                        deviceWateringService.doAction(device.getId(), request, false);
+                        device.setWatering(false);
+                    }
                     device = deviceRepository.save(device);
                 }
 
@@ -143,6 +154,9 @@ public class RealtimeService {
             } catch (JsonProcessingException e) {
                 log.error("RealtimeService.sendDeviceStatus: {}", e.getMessage());
                 throw new AppException(ErrorCode.SERVER_ERROR);
+            } catch (MqttException e) {
+                log.error("RealtimeService.sendDeviceStatus: {}", e.getMessage());
+                throw new RuntimeException(e);
             }
         }
     }
