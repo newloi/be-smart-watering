@@ -46,7 +46,7 @@ public class GroupWateringService {
         group.getDevices().forEach(device -> {
             taskExecutor.execute(() -> {
                 try {
-                    deviceWateringService.doAction(device.getId(), request, true);
+                    deviceWateringService.doAction(device.getId(), request, true, null);
                 } catch (MqttException | JsonProcessingException e) {
                     throw new RuntimeException(e);
                 }

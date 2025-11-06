@@ -6,6 +6,7 @@ import com.smart_watering_system.SmartWateringSystem.dto.request.WateringRequest
 import com.smart_watering_system.SmartWateringSystem.dto.response.WateringResponse;
 import com.smart_watering_system.SmartWateringSystem.entity.Device;
 import com.smart_watering_system.SmartWateringSystem.entity.DeviceWateringHistory;
+import com.smart_watering_system.SmartWateringSystem.entity.User;
 import com.smart_watering_system.SmartWateringSystem.enums.Action;
 import com.smart_watering_system.SmartWateringSystem.enums.ErrorCode;
 import com.smart_watering_system.SmartWateringSystem.exception.AppException;
@@ -38,9 +39,9 @@ public class DeviceWateringService {
     DeviceRepository deviceRepository;
     UserService userService;
 
-    public WateringResponse doAction(String id, WateringRequest request, boolean byGroup)
+    public WateringResponse doAction(String id, WateringRequest request, boolean byGroup, User user)
             throws MqttException, JsonProcessingException {
-        Device device = deviceRepository.findByIdAndUserWithHistories(id, userService.getUser())
+        Device device = deviceRepository.findByIdAndUserWithHistories(id, Objects.isNull(user) ? userService.getUser() : user)
                 .orElseThrow(() -> new AppException(ErrorCode.DEVICE_NOT_EXISTED));
 
         if(!device.isOnline()) {

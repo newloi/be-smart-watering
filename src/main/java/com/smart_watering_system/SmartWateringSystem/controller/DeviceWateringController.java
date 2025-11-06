@@ -32,7 +32,7 @@ public class DeviceWateringController {
                                            @PathVariable("id") String id) throws MqttException, JsonProcessingException {
         return ApiResponse.<WateringResponse>builder()
                 .statusCode(HttpStatus.OK.value())
-                .data(deviceWateringService.doAction(id, request,false))
+                .data(deviceWateringService.doAction(id, request,false, null))
                 .build();
     }
 

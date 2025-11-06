@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
+import java.util.concurrent.Executor;
 
 @Slf4j
 @Service
@@ -39,6 +40,7 @@ public class RealtimeService {
     DataSensorMapper dataSensorMapper;
     ObjectMapper objectMapper;
     DeviceWateringService deviceWateringService;
+    Executor taskExecutor;
 
     @Transactional
     public void sendData(String topic, String payload) {
@@ -132,12 +134,20 @@ public class RealtimeService {
                 if (device.isOnline() != isOnline) {
                     device.setOnline(isOnline);
                     if(!isOnline && device.isWatering()) {
-                        WateringRequest request = WateringRequest.builder()
-                                .action(Action.STOP)
-                                .duration(0)
-                                .build();
-                        deviceWateringService.doAction(device.getId(), request, false);
-                        device.setWatering(false);
+                        Device finalDevice = device;
+                        taskExecutor.execute(() -> {
+                            WateringRequest request = WateringRequest.builder()
+                                    .action(Action.STOP)
+                                    .duration(0)
+                                    .build();
+                            try {
+                                deviceWateringService.doAction(finalDevice.getId(), request, false, finalDevice.getUser());
+                            } catch (MqttException | JsonProcessingException e) {
+                                log.error("RealtimeService.sendDeviceStatus.taskExecutor: {}", e.getMessage());
+                            }
+                            finalDevice.setWatering(false);
+                            deviceRepository.save(finalDevice);
+                        });
                     }
                     device = deviceRepository.save(device);
                 }
@@ -149,7 +159,7 @@ public class RealtimeService {
                         device.getUser().getUsername(),
                         objectMapper.writeValueAsString(json),
                         "/devices/status", "/device/status/" + deviceId);
-            } catch (JsonProcessingException | MqttException e) {
+            } catch (JsonProcessingException e) {
                 log.error("RealtimeService.sendDeviceStatus: {}", e.getMessage());
             }
         }
