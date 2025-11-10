@@ -16,15 +16,11 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.eclipse.paho.client.mqttv3.MqttException;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -108,6 +104,18 @@ public class DeviceService {
 
         List<DataSensorHistory> histories = dataSensorHistoryRepository.findAllByDevice(device, pageable);
         return histories.stream().map(dataSensorMapper::toDataSensorResponse).toList();
+    }
+
+    public long getQuantity() {
+        return deviceRepository.countByUser(userService.getUser());
+    }
+
+    public long getQuantityFree() {
+        return deviceRepository.countByUserAndGroupIsNull(userService.getUser());
+    }
+
+    public long getQuantitySearch(String keyword) {
+        return deviceRepository.countByUserAndNameContainingIgnoreCase(userService.getUser(), keyword);
     }
 
 }

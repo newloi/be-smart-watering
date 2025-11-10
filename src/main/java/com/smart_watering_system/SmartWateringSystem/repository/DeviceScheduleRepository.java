@@ -13,4 +13,5 @@ import java.util.Optional;
 public interface DeviceScheduleRepository extends JpaRepository<DeviceSchedule, String> {
     Optional<DeviceSchedule> findByIdAndDevice(String id, Device device);
     List<DeviceSchedule> findAllByDevice(Device device, Pageable pageable);
+    long countByDevice(Device device);
 }

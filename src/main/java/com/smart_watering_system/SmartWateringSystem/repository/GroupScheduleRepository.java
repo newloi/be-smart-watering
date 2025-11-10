@@ -13,4 +13,5 @@ import java.util.Optional;
 public interface GroupScheduleRepository extends JpaRepository<GroupSchedule, String> {
     Optional<GroupSchedule> findByIdAndGroup(String id, Group group);
     List<GroupSchedule> findAllByGroup(Group group, Pageable pageable);
+    long countByGroup(Group group);
 }

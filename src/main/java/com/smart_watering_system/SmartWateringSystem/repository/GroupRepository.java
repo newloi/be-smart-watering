@@ -21,4 +21,6 @@ public interface GroupRepository extends JpaRepository<Group, String> {
     Group findByIdWithHistories(@Param("id") String id);
 
     List<Group> findByUserAndNameContainingIgnoreCase(User user, String keyword, Pageable pageable);
+    long countByUser(User user);
+    long countByUserAndNameContainingIgnoreCase(User user, String keyword);
 }

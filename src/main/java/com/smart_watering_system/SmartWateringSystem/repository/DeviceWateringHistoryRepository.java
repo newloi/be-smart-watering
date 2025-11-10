@@ -11,4 +11,5 @@ import java.util.List;
 @Repository
 public interface DeviceWateringHistoryRepository extends JpaRepository<DeviceWateringHistory, String> {
     List<DeviceWateringHistory> findAllByDevice(Device device, Pageable pageable);
+    long countByDevice(Device device);
 }

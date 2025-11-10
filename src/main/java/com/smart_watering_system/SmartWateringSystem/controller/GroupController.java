@@ -40,6 +40,7 @@ public class GroupController {
             direction = Sort.Direction.DESC) Pageable pageable) {
         return ApiResponse.<List<GroupResponse>>builder()
                 .statusCode(HttpStatus.OK.value())
+                .quantity(groupService.getQuantity())
                 .data(groupService.getAll(pageable))
                 .build();
     }
@@ -76,6 +77,7 @@ public class GroupController {
                                                                 direction = Sort.Direction.DESC) Pageable pageable) {
         return ApiResponse.<List<GroupResponse>>builder()
                 .statusCode(HttpStatus.OK.value())
+                .quantity(groupService.getQuantitySearch(keyword))
                 .data(groupService.searchByKeyword(keyword, pageable))
                 .build();
     }

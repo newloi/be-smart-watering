@@ -38,6 +38,7 @@ public class DeviceWateringService {
     WateringMapper wateringMapper;
     DeviceRepository deviceRepository;
     UserService userService;
+    DeviceService deviceService;
 
     public WateringResponse doAction(String id, WateringRequest request, boolean byGroup, User user)
             throws MqttException, JsonProcessingException {
@@ -126,6 +127,10 @@ public class DeviceWateringService {
             history.setByGroup(byGroup);
             deviceWateringHistoryRepository.save(history);
         }
+    }
+
+    public long getQuantity(String id) {
+        return deviceWateringHistoryRepository.countByDevice(deviceService.getById(id));
     }
 
 }

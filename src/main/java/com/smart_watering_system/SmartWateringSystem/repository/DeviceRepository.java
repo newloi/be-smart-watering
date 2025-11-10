@@ -26,4 +26,8 @@ public interface DeviceRepository extends JpaRepository<Device, String> {
     Optional<Device> findByIdAndUserWithHistories(@Param("id") String id, @Param("user") User user);
 
     List<Device> findByUserAndNameContainingIgnoreCase(User user, String keyword, Pageable pageable);
+
+    long countByUser(User user);
+    long countByUserAndGroupIsNull(User user);
+    long countByUserAndNameContainingIgnoreCase(User user, String keyword);
 }

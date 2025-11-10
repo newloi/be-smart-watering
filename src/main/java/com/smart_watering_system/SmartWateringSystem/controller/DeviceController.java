@@ -40,6 +40,7 @@ public class DeviceController {
                                                             direction = Sort.Direction.DESC) Pageable pageable) {
         return ApiResponse.<List<DeviceResponse>>builder()
                 .statusCode(HttpStatus.OK.value())
+                .quantity(deviceService.getQuantity())
                 .data(deviceService.getAll(pageable))
                 .build();
     }
@@ -75,6 +76,7 @@ public class DeviceController {
                                                                direction = Sort.Direction.DESC) Pageable pageable) {
         return ApiResponse.<List<DeviceResponse>>builder()
                 .statusCode(HttpStatus.OK.value())
+                .quantity(deviceService.getQuantityFree())
                 .data(deviceService.getAllFree(pageable))
                 .build();
     }
@@ -85,6 +87,7 @@ public class DeviceController {
                                                                  direction = Sort.Direction.DESC) Pageable pageable) {
         return ApiResponse.<List<DeviceResponse>>builder()
                 .statusCode(HttpStatus.OK.value())
+                .quantity(deviceService.getQuantitySearch(keyword))
                 .data(deviceService.searchByKeyword(keyword, pageable))
                 .build();
     }

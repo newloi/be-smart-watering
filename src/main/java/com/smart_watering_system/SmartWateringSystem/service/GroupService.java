@@ -127,4 +127,12 @@ public class GroupService {
                 .stream().map(groupMapper::toGroupResponse).toList();
     }
 
+    public long getQuantity() {
+        return groupRepository.countByUser(userService.getUser());
+    }
+
+    public long getQuantitySearch(String keyword) {
+        return groupRepository.countByUserAndNameContainingIgnoreCase(userService.getUser(), keyword);
+    }
+
 }

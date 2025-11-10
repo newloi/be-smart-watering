@@ -43,6 +43,7 @@ public class DeviceWateringController {
                                                         )Pageable pageable) {
         return ApiResponse.<List<WateringResponse>>builder()
                 .statusCode(HttpStatus.OK.value())
+                .quantity(deviceWateringService.getQuantity(id))
                 .data(deviceWateringService.getAllHistories(id, pageable))
                 .build();
     }

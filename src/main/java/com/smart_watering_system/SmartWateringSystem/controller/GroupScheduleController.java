@@ -71,6 +71,7 @@ public class GroupScheduleController {
                                                                       direction = Sort.Direction.DESC) Pageable pageable) {
         return ApiResponse.<List<ScheduleResponse>>builder()
                 .statusCode(HttpStatus.OK.value())
+                .quantity(groupSchedulerService.getQuantity(id))
                 .data(groupSchedulerService.getAll(id, pageable))
                 .build();
     }

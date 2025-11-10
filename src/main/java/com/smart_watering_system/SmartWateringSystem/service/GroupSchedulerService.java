@@ -154,4 +154,8 @@ public class GroupSchedulerService {
         return scheduleMapper.toScheduleResponse(schedule);
     }
 
+    public long getQuantity(String groupId) {
+        return groupScheduleRepository.countByGroup(groupService.getById(groupId));
+    }
+
 }

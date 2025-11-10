@@ -13,5 +13,6 @@ import lombok.experimental.FieldDefaults;
 public class ApiResponse<T> {
     int statusCode;
     String message;
+    long quantity;
     T data;
 }

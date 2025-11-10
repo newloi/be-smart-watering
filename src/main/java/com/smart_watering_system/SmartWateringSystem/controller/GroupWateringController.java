@@ -45,6 +45,7 @@ public class GroupWateringController {
                                                         ) Pageable pageable) {
         return ApiResponse.<List<WateringResponse>>builder()
                 .statusCode(HttpStatus.OK.value())
+                .quantity(groupWateringService.getQuantity(id))
                 .data(groupWateringService.getAllHistories(id, pageable))
                 .build();
     }

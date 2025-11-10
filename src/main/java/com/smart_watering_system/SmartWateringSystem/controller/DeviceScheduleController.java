@@ -71,6 +71,7 @@ public class DeviceScheduleController {
                                                                       direction = Sort.Direction.DESC) Pageable pageable) {
         return ApiResponse.<List<ScheduleResponse>>builder()
                 .statusCode(HttpStatus.OK.value())
+                .quantity(deviceSchedulerService.getQuantity(id))
                 .data(deviceSchedulerService.getAll(id, pageable))
                 .build();
     }

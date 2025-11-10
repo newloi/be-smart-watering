@@ -11,4 +11,5 @@ import java.util.List;
 @Repository
 public interface GroupWateringHistoryRepository extends JpaRepository<GroupWateringHistory, String> {
     List<GroupWateringHistory> findAllByGroup(Group group, Pageable pageable);
+    long countByGroup(Group group);
 }

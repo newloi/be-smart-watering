@@ -37,6 +37,7 @@ public class GroupWateringService {
     WateringMapper wateringMapper;
     GroupWateringHistoryRepository groupWateringHistoryRepository;
     UserService userService;
+    GroupService groupService;
 
     public WateringResponse doAction(String id, WateringRequest request) {
         var user = userService.getUser();
@@ -119,6 +120,10 @@ public class GroupWateringService {
             history.setGroup(group);
             groupWateringHistoryRepository.save(history);
         }
+    }
+
+    public long getQuantity(String groupId) {
+        return groupWateringHistoryRepository.countByGroup(groupService.getById(groupId));
     }
 
 }

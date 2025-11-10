@@ -167,4 +167,8 @@ public class DeviceSchedulerService {
         return scheduleMapper.toScheduleResponse(schedule);
     }
 
+    public long getQuantity(String id) {
+        return deviceScheduleRepository.countByDevice(deviceService.getById(id));
+    }
+
 }
