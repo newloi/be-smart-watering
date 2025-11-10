@@ -17,13 +17,17 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ScheduledFuture;
 
 @Slf4j
 @Service
@@ -38,6 +42,9 @@ public class GroupWateringService {
     GroupWateringHistoryRepository groupWateringHistoryRepository;
     UserService userService;
     GroupService groupService;
+    RealtimeService realtimeService;
+    Map<String, ScheduledFuture<?>> schedules;
+    TaskScheduler taskScheduler;
 
     public WateringResponse doAction(String id, WateringRequest request) {
         var user = userService.getUser();
@@ -61,6 +68,12 @@ public class GroupWateringService {
 
         if (action == Action.START) {
             if (!isRunning) {
+                realtimeService.sendGroupWateringStatus(group, true);
+                LocalDateTime stopAt = LocalDateTime.now().plusSeconds(request.getDuration());
+                String cronExpression = String.format("%d %d %d * * *", stopAt.getSecond(), stopAt.getMinute(), stopAt.getHour());
+                var scheduler = taskScheduler.schedule(() -> stopWateringGroup(group),
+                        new CronTrigger(cronExpression));
+                schedules.put(group.getId(), scheduler);
 
                 GroupWateringHistory history = wateringMapper.toGroupWateringHistory(request);
                 history.setGroup(group);
@@ -74,6 +87,8 @@ public class GroupWateringService {
 
         } else if (action == Action.STOP) {
             if (isRunning) {
+                stopWateringGroup(group);
+
                 recentWatering.setDuration(
                         ChronoUnit.SECONDS.between(recentWatering.getStartTime(), LocalDateTime.now())
                 );
@@ -124,6 +139,16 @@ public class GroupWateringService {
 
     public long getQuantity(String groupId) {
         return groupWateringHistoryRepository.countByGroup(groupService.getById(groupId));
+    }
+
+    private void stopWateringGroup(Group group) {
+        realtimeService.sendGroupWateringStatus(group, false);
+
+        String groupId = group.getId();
+        if(schedules.containsKey(groupId)) {
+            schedules.get(groupId).cancel(true);
+            schedules.remove(groupId);
+        }
     }
 
 }

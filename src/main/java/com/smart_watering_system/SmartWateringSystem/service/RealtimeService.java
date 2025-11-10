@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.smart_watering_system.SmartWateringSystem.dto.request.WateringRequest;
 import com.smart_watering_system.SmartWateringSystem.entity.DataSensorHistory;
 import com.smart_watering_system.SmartWateringSystem.entity.Device;
+import com.smart_watering_system.SmartWateringSystem.entity.Group;
 import com.smart_watering_system.SmartWateringSystem.enums.Action;
 import com.smart_watering_system.SmartWateringSystem.enums.ErrorCode;
 import com.smart_watering_system.SmartWateringSystem.exception.AppException;
@@ -21,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -165,7 +167,15 @@ public class RealtimeService {
         }
     }
 
-    private void sendMessageTo(String user, String message, String ...destinations) {
+    public void sendGroupWateringStatus(Group group, boolean isWatering) {
+        String message = "{\"groupId\":\"" + group.getId() + "\",\"isWatering\":" + isWatering + ",\"timestamp\":" + LocalDateTime.now() + "}";
+
+        sendMessageTo(group.getUser().getUsername(), message,
+                "/groups/watering", "/group/watering/" + group.getId());
+    }
+
+    @Async
+    public void sendMessageTo(String user, String message, String... destinations) {
         for(var des : destinations) {
             simpMessagingTemplate.convertAndSendToUser(user, des, message);
             log.info("Sent: {}", message);
