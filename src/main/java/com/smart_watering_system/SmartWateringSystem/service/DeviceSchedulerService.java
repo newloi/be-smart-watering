@@ -116,8 +116,10 @@ public class DeviceSchedulerService {
         var schedule = deviceScheduleRepository.findByIdAndDevice(scheduleId, device)
                         .orElseThrow(() -> new AppException(ErrorCode.SCHEDULE_NOT_EXISTED));
 
-        schedules.get(schedule.getId()).cancel(true);
-        schedules.remove(schedule.getId());
+        if(schedules.containsKey(schedule.getId())) {
+            schedules.get(schedule.getId()).cancel(true);
+            schedules.remove(schedule.getId());
+        }
         deviceScheduleRepository.delete(schedule);
     }
 
