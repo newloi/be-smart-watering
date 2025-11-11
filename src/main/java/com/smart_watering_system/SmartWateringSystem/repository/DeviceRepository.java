@@ -1,6 +1,7 @@
 package com.smart_watering_system.SmartWateringSystem.repository;
 
 import com.smart_watering_system.SmartWateringSystem.entity.Device;
+import com.smart_watering_system.SmartWateringSystem.entity.Group;
 import com.smart_watering_system.SmartWateringSystem.entity.User;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -30,4 +31,5 @@ public interface DeviceRepository extends JpaRepository<Device, String> {
     long countByUser(User user);
     long countByUserAndGroupIsNull(User user);
     long countByUserAndNameContainingIgnoreCase(User user, String keyword);
+    long countByGroup(Group group);
 }

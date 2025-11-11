@@ -5,6 +5,7 @@ import com.smart_watering_system.SmartWateringSystem.dto.response.DataSensorResp
 import com.smart_watering_system.SmartWateringSystem.dto.response.DeviceResponse;
 import com.smart_watering_system.SmartWateringSystem.entity.DataSensorHistory;
 import com.smart_watering_system.SmartWateringSystem.entity.Device;
+import com.smart_watering_system.SmartWateringSystem.entity.Group;
 import com.smart_watering_system.SmartWateringSystem.entity.User;
 import com.smart_watering_system.SmartWateringSystem.enums.ErrorCode;
 import com.smart_watering_system.SmartWateringSystem.exception.AppException;
@@ -116,6 +117,10 @@ public class DeviceService {
 
     public long getQuantitySearch(String keyword) {
         return deviceRepository.countByUserAndNameContainingIgnoreCase(userService.getUser(), keyword);
+    }
+
+    public long getQuantityByGroup(Group group) {
+        return deviceRepository.countByGroup(group);
     }
 
 }

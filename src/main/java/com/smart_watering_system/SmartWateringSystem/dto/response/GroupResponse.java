@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 public class GroupResponse {
     String id;
     String name;
+    long quantity;
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
 }

@@ -30,6 +30,7 @@ public class GroupService {
     DeviceRepository deviceRepository;
     DeviceMapper deviceMapper;
     UserService userService;
+    DeviceService deviceService;
 
     public GroupDetailResponse create(GroupRequest request) {
         var user = userService.getUser();
@@ -61,7 +62,11 @@ public class GroupService {
 
     public List<GroupResponse> getAll(Pageable pageable) {
         var groups = groupRepository.findAllByUser(userService.getUser(), pageable);
-        return groups.stream().map(groupMapper::toGroupResponse).toList();
+        return groups.stream().map(group -> {
+            var groupResponse = groupMapper.toGroupResponse(group);
+            groupResponse.setQuantity(deviceService.getQuantityByGroup(group));
+            return groupResponse;
+        }).toList();
     }
 
     public GroupDetailResponse get(String id) {
