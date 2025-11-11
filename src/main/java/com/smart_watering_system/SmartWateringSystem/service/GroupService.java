@@ -64,7 +64,7 @@ public class GroupService {
         var groups = groupRepository.findAllByUser(userService.getUser(), pageable);
         return groups.stream().map(group -> {
             var groupResponse = groupMapper.toGroupResponse(group);
-            groupResponse.setQuantity(deviceService.getQuantityByGroup(group));
+            groupResponse.setDevicesQuantity(deviceService.getQuantityByGroup(group));
             return groupResponse;
         }).toList();
     }
