@@ -72,7 +72,7 @@ public class GroupController {
     }
 
     @GetMapping("/search")
-    ApiResponse<List<GroupResponse>> searchDeviceByName(@RequestParam("name") String keyword,
+    ApiResponse<List<GroupResponse>> searchGroupByName(@RequestParam("name") String keyword,
                                                         @PageableDefault(sort = "createdAt",
                                                                 direction = Sort.Direction.DESC) Pageable pageable) {
         return ApiResponse.<List<GroupResponse>>builder()

@@ -129,7 +129,11 @@ public class GroupService {
 
     public List<GroupResponse> searchByKeyword(String keyword, Pageable pageable) {
         return groupRepository.findByUserAndNameContainingIgnoreCase(userService.getUser(), keyword, pageable)
-                .stream().map(groupMapper::toGroupResponse).toList();
+                .stream().map(group -> {
+                    var groupResponse = groupMapper.toGroupResponse(group);
+                    groupResponse.setDevicesQuantity(deviceService.getQuantityByGroup(group));
+                    return groupResponse;
+                }).toList();
     }
 
     public long getQuantity() {
