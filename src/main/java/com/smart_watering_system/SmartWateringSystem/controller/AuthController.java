@@ -54,8 +54,11 @@ public class AuthController {
     @PostMapping("/log-out")
     ApiResponse<Void> logout(@CookieValue(name = "refreshToken", required = false) String refreshToken,
                              @RequestBody(required = false) IntrospectRequest request) throws ParseException, JOSEException {
-
-        authService.logout(Objects.isNull(refreshToken) ? request.getRefreshToken() : refreshToken);
+        authService.logout(Objects.isNull(refreshToken)
+                ? (Objects.isNull(request)
+                    ? null
+                    : request.getRefreshToken())
+                : refreshToken);
 
         return ApiResponse.<Void>builder()
                 .statusCode(HttpStatus.OK.value())

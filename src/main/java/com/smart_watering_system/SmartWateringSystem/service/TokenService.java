@@ -78,6 +78,8 @@ public class TokenService {
     public SignedJWT verifyToken(String token) throws JOSEException, ParseException {
         JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
 
+        if(Objects.isNull(token)) throw new AppException(ErrorCode.UNAUTHENTICATED);
+
         SignedJWT signedJWT = SignedJWT.parse(token);
         Date expirationTime = signedJWT.getJWTClaimsSet().getExpirationTime();
 

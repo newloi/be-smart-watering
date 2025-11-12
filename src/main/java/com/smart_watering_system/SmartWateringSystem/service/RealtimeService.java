@@ -14,6 +14,7 @@ import com.smart_watering_system.SmartWateringSystem.exception.AppException;
 import com.smart_watering_system.SmartWateringSystem.mapper.DataSensorMapper;
 import com.smart_watering_system.SmartWateringSystem.repository.DataSensorHistoryRepository;
 import com.smart_watering_system.SmartWateringSystem.repository.DeviceRepository;
+import com.smart_watering_system.SmartWateringSystem.repository.GroupRepository;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -43,6 +44,7 @@ public class RealtimeService {
     ObjectMapper objectMapper;
     DeviceWateringService deviceWateringService;
     Executor taskExecutor;
+    GroupRepository groupRepository;
 
     @Transactional
     public void sendData(String topic, String payload) {
@@ -168,7 +170,10 @@ public class RealtimeService {
     }
 
     public void sendGroupWateringStatus(Group group, boolean isWatering) {
-        String message = "{\"groupId\":\"" + group.getId() + "\",\"isWatering\":" + isWatering + ",\"timestamp\":" + LocalDateTime.now() + "}";
+        group.setWatering(isWatering);
+        groupRepository.save(group);
+
+        String message = "{\"groupId\":\"" + group.getId() + "\",\"isWatering\":" + isWatering + "}";
 
         sendMessageTo(group.getUser().getUsername(), message,
                 "/groups/watering", "/group/watering/" + group.getId());
