@@ -14,6 +14,7 @@ public class GroupResponse {
     String id;
     String name;
     long devicesQuantity;
+    boolean isWatering;
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
 }

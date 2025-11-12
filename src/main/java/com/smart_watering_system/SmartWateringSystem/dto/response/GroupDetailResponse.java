@@ -14,6 +14,7 @@ import java.util.List;
 public class GroupDetailResponse {
     String id;
     String name;
+    boolean isWatering;
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
     List<DeviceResponse> devices;

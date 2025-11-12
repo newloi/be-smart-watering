@@ -15,8 +15,10 @@ public interface GroupMapper {
     Group toGroup(GroupRequest request);
 
     @Mapping(target = "devices", ignore = true)
+    @Mapping(target = "isWatering", source = "watering")
     GroupDetailResponse toGroupDetailResponse(Group group);
 
+    @Mapping(target = "isWatering", source = "watering")
     GroupResponse toGroupResponse(Group group);
 
     @Mapping(target = "devices", ignore = true)
