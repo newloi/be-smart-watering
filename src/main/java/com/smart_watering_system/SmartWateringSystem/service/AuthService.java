@@ -45,7 +45,7 @@ public class AuthService {
         var user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
-        if (!user.isVerified()) throw new AppException(ErrorCode.ACC_NOT_VERIFIED);
+//        if (!user.isVerified()) throw new AppException(ErrorCode.ACC_NOT_VERIFIED);
 
         boolean isAuthenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
         if (!isAuthenticated) throw new AppException(ErrorCode.WRONG_PASSWORD);
