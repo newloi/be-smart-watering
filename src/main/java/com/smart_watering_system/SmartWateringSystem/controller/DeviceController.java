@@ -37,7 +37,7 @@ public class DeviceController {
 
     @GetMapping
     ApiResponse<List<DeviceResponse>> getAllDevices(@PageableDefault(sort = "createdAt",
-                                                            direction = Sort.Direction.DESC) Pageable pageable) {
+            direction = Sort.Direction.DESC) Pageable pageable) {
         return ApiResponse.<List<DeviceResponse>>builder()
                 .statusCode(HttpStatus.OK.value())
                 .quantity(deviceService.getQuantity())
@@ -73,7 +73,7 @@ public class DeviceController {
 
     @GetMapping("/free")
     ApiResponse<List<DeviceResponse>> getAllFreeDevice(@PageableDefault(sort = "createdAt",
-                                                               direction = Sort.Direction.DESC) Pageable pageable) {
+            direction = Sort.Direction.DESC) Pageable pageable) {
         return ApiResponse.<List<DeviceResponse>>builder()
                 .statusCode(HttpStatus.OK.value())
                 .quantity(deviceService.getQuantityFree())
@@ -89,6 +89,22 @@ public class DeviceController {
                 .statusCode(HttpStatus.OK.value())
                 .quantity(deviceService.getQuantitySearch(keyword))
                 .data(deviceService.searchByKeyword(keyword, pageable))
+                .build();
+    }
+
+    @GetMapping("/quantity")
+    ApiResponse<Void> getQuantityDevice() {
+        return ApiResponse.<Void>builder()
+                .statusCode(HttpStatus.OK.value())
+                .quantity(deviceService.getQuantity())
+                .build();
+    }
+
+    @GetMapping("/quantity-online")
+    ApiResponse<Void> getQuantityDeviceOnline() {
+        return ApiResponse.<Void>builder()
+                .statusCode(HttpStatus.OK.value())
+                .quantity(deviceService.getQuantityOnline())
                 .build();
     }
 

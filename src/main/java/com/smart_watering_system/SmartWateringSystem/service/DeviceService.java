@@ -56,7 +56,7 @@ public class DeviceService {
                 .map(deviceMapper::toDeviceResponse).toList();
     }
 
-//    @Cacheable(value = "devices", key = "#id + '-' + #user.id")
+    //    @Cacheable(value = "devices", key = "#id + '-' + #user.id")
     public DeviceResponse get(String id, User user) throws MqttException {
         var device = deviceRepository.findByIdAndUser(id, user)
                 .orElseThrow(() -> new AppException(ErrorCode.DEVICE_NOT_EXISTED));
@@ -64,7 +64,7 @@ public class DeviceService {
         return deviceMapper.toDeviceResponse(device);
     }
 
-//    @CacheEvict(value = "devices", key = "#id + '-' + #user.id")
+    //    @CacheEvict(value = "devices", key = "#id + '-' + #user.id")
     public void delete(String id, User user) {
         var device = deviceRepository.findByIdAndUser(id, user)
                 .orElseThrow(() -> new AppException(ErrorCode.DEVICE_NOT_EXISTED));
@@ -72,7 +72,7 @@ public class DeviceService {
         deviceRepository.delete(device);
     }
 
-//    @CachePut(value = "devices", key = "#id + '-' + #user.id")
+    //    @CachePut(value = "devices", key = "#id + '-' + #user.id")
     public DeviceResponse update(String id, DeviceRequest request, User user) {
         var device = deviceRepository.findByIdAndUser(id, user)
                 .orElseThrow(() -> new AppException(ErrorCode.DEVICE_NOT_EXISTED));
@@ -99,7 +99,7 @@ public class DeviceService {
                 .stream().map(deviceMapper::toDeviceResponse).toList();
     }
 
-    public List<DataSensorResponse> getHistorySensor(String id,Pageable pageable) {
+    public List<DataSensorResponse> getHistorySensor(String id, Pageable pageable) {
         Device device = deviceRepository.findByIdAndUser(id, userService.getUser())
                 .orElseThrow(() -> new AppException(ErrorCode.DEVICE_NOT_EXISTED));
 
@@ -109,6 +109,10 @@ public class DeviceService {
 
     public long getQuantity() {
         return deviceRepository.countByUser(userService.getUser());
+    }
+
+    public long getQuantityOnline() {
+        return deviceRepository.countByUserAndIsOnlineIsTrue(userService.getUser());
     }
 
     public long getQuantityFree() {

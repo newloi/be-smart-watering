@@ -82,4 +82,12 @@ public class GroupController {
                 .build();
     }
 
+    @GetMapping("/quantity")
+    ApiResponse<Void> getQuantityGroup() {
+        return ApiResponse.<Void>builder()
+                .statusCode(HttpStatus.OK.value())
+                .quantity(groupService.getQuantity())
+                .build();
+    }
+
 }

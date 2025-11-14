@@ -11,7 +11,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Repository
 public interface DeviceRepository extends JpaRepository<Device, String> {
@@ -29,6 +28,7 @@ public interface DeviceRepository extends JpaRepository<Device, String> {
     List<Device> findByUserAndNameContainingIgnoreCase(User user, String keyword, Pageable pageable);
 
     long countByUser(User user);
+    long countByUserAndIsOnlineIsTrue(User user);
     long countByUserAndGroupIsNull(User user);
     long countByUserAndNameContainingIgnoreCase(User user, String keyword);
     long countByGroup(Group group);
