@@ -49,4 +49,7 @@ public class Group {
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("startTime DESC")
     List<GroupWateringHistory> histories;
+
+    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<GroupSchedule> schedules;
 }
