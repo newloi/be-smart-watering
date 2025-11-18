@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,4 +15,5 @@ public interface DeviceScheduleRepository extends JpaRepository<DeviceSchedule, 
     Optional<DeviceSchedule> findByIdAndDevice(String id, Device device);
     List<DeviceSchedule> findAllByDevice(Device device, Pageable pageable);
     long countByDevice(Device device);
+    Optional<DeviceSchedule> findFirstByDeviceAndStatusIsTrueAndRunAtAfterOrderByRunAtAsc(Device device, LocalDateTime dateTime);
 }

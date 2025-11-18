@@ -20,4 +20,5 @@ public class DeviceResponse {
     boolean isWatering;
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
+    ScheduleResponse nextSchedule;
 }

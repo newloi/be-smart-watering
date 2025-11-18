@@ -32,6 +32,7 @@ public class DeviceSchedule {
     Repeat repeatType;
     List<Day> daysOfWeek;
     boolean status;
+    LocalDateTime runAt;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)

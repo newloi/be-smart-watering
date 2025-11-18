@@ -6,6 +6,7 @@ import com.smart_watering_system.SmartWateringSystem.enums.Repeat;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -23,6 +24,7 @@ public class ScheduleResponse {
     Repeat repeatType;
     List<Day> daysOfWeek;
     boolean status;
+    long runAfter;
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
 }
