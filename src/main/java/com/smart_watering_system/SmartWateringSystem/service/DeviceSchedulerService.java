@@ -49,11 +49,16 @@ public class DeviceSchedulerService {
 
         var schedule = scheduleMapper.toDeviceSchedule(request);
         schedule.setDevice(device);
-        schedule = deviceScheduleRepository.save(schedule);
-
         runSchedule(schedule);
 
-        return scheduleMapper.toScheduleResponse(schedule);
+        var response = scheduleMapper.toScheduleResponse(schedule);
+        if (schedule.isStatus()) {
+            response.setRunAfter(Duration.between(LocalDateTime.now(), schedule.getRunAt()).getSeconds());
+        } else {
+            response.setRunAfter(-1);
+        }
+
+        return response;
     }
 
     public void runSchedule(DeviceSchedule schedule) {
