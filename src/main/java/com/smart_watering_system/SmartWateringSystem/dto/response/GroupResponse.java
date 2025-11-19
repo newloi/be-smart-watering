@@ -17,4 +17,5 @@ public class GroupResponse {
     boolean isWatering;
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
+    ScheduleResponse nextSchedule;
 }

@@ -3,6 +3,7 @@ package com.smart_watering_system.SmartWateringSystem.service;
 import com.smart_watering_system.SmartWateringSystem.dto.request.DeviceRequest;
 import com.smart_watering_system.SmartWateringSystem.dto.response.DataSensorResponse;
 import com.smart_watering_system.SmartWateringSystem.dto.response.DeviceResponse;
+import com.smart_watering_system.SmartWateringSystem.dto.response.ScheduleResponse;
 import com.smart_watering_system.SmartWateringSystem.entity.DataSensorHistory;
 import com.smart_watering_system.SmartWateringSystem.entity.Device;
 import com.smart_watering_system.SmartWateringSystem.entity.Group;
@@ -38,8 +39,6 @@ public class DeviceService {
     UserService userService;
     DataSensorHistoryRepository dataSensorHistoryRepository;
     DataSensorMapper dataSensorMapper;
-    ScheduleMapper scheduleMapper;
-    DeviceScheduleRepository deviceScheduleRepository;
 
     public DeviceResponse create(DeviceRequest request) {
         var device = deviceMapper.toDevice(request);
@@ -60,19 +59,7 @@ public class DeviceService {
 
     public List<DeviceResponse> getAll(Pageable pageable) {
         return deviceRepository.findAllByUser(userService.getUser(), pageable).stream()
-                .map(device -> {
-                    var response = deviceMapper.toDeviceResponse(device);
-                    var nextSchedule = deviceScheduleRepository
-                            .findFirstByDeviceAndStatusIsTrueAndRunAtAfterOrderByRunAtAsc(device, LocalDateTime.now())
-                            .orElse(null);
-                    var scheduleResponse = scheduleMapper
-                            .toScheduleResponse(nextSchedule);
-                    if(!Objects.isNull(nextSchedule))
-                        scheduleResponse.setRunAfter(
-                                Duration.between(LocalDateTime.now(), nextSchedule.getRunAt()).getSeconds());
-                    response.setNextSchedule(scheduleResponse);
-                    return response;
-                }).toList();
+                .map(deviceMapper::toDeviceResponse).toList();
     }
 
     //    @Cacheable(value = "devices", key = "#id + '-' + #user.id")
@@ -80,17 +67,7 @@ public class DeviceService {
         var device = deviceRepository.findByIdAndUser(id, user)
                 .orElseThrow(() -> new AppException(ErrorCode.DEVICE_NOT_EXISTED));
 
-        var response = deviceMapper.toDeviceResponse(device);
-        var nextSchedule = deviceScheduleRepository
-                .findFirstByDeviceAndStatusIsTrueAndRunAtAfterOrderByRunAtAsc(device, LocalDateTime.now())
-                .orElse(null);
-        var scheduleResponse = scheduleMapper
-                .toScheduleResponse(nextSchedule);
-        if(!Objects.isNull(nextSchedule))
-            scheduleResponse.setRunAfter(
-                    Duration.between(LocalDateTime.now(), nextSchedule.getRunAt()).getSeconds());
-        response.setNextSchedule(scheduleResponse);
-        return response;
+        return deviceMapper.toDeviceResponse(device);
     }
 
     //    @CacheEvict(value = "devices", key = "#id + '-' + #user.id")

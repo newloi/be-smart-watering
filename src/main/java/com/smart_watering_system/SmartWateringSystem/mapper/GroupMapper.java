@@ -8,7 +8,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = MapperHelper.class)
 public interface GroupMapper {
 
     @Mapping(target = "devices", ignore = true)
@@ -16,9 +16,11 @@ public interface GroupMapper {
 
     @Mapping(target = "devices", ignore = true)
     @Mapping(target = "isWatering", source = "watering")
+    @Mapping(target = "nextSchedule", source = "group", qualifiedByName = "getNextSchedule")
     GroupDetailResponse toGroupDetailResponse(Group group);
 
     @Mapping(target = "isWatering", source = "watering")
+    @Mapping(target = "nextSchedule", source = "group", qualifiedByName = "getNextSchedule")
     GroupResponse toGroupResponse(Group group);
 
     @Mapping(target = "devices", ignore = true)

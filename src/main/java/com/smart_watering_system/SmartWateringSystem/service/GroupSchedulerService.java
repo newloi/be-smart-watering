@@ -18,6 +18,9 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
@@ -41,11 +44,16 @@ public class GroupSchedulerService {
 
         var schedule = scheduleMapper.toGroupSchedule(request);
         schedule.setGroup(group);
-        schedule = groupScheduleRepository.save(schedule);
-
         runSchedule(schedule);
 
-        return scheduleMapper.toScheduleResponse(schedule);
+        var response = scheduleMapper.toScheduleResponse(schedule);
+        if (schedule.isStatus()) {
+            response.setRunAfter(Duration.between(LocalDateTime.now(), schedule.getRunAt()).getSeconds());
+        } else {
+            response.setRunAfter(-1);
+        }
+
+        return response;
     }
 
     public void runSchedule(GroupSchedule schedule) {
@@ -55,16 +63,33 @@ public class GroupSchedulerService {
 
         Repeat repeatType = schedule.getRepeatType();
         LocalTime startTime = schedule.getStartTime();
+        LocalTime timeNow = LocalTime.now();
+        LocalDate dateNow = LocalDate.now();
         switch (repeatType) {
             case EVERYDAY -> {
                 cronExpression = String.format("0 %d %d * * *", startTime.getMinute(), startTime.getHour());
+
+                if (startTime.isBefore(timeNow)) schedule.setRunAt(LocalDateTime.of(dateNow.plusDays(1), startTime));
+                else schedule.setRunAt(LocalDateTime.of(dateNow, startTime));
+                groupScheduleRepository.save(schedule);
             }
             case DAYS -> {
                 String days = schedule.getDaysOfWeek().stream().map(Day::name).collect(Collectors.joining(","));
                 cronExpression = String.format("0 %d %d * * %s", startTime.getMinute(), startTime.getHour(), days);
+
+                int currentDayOfWeek = dateNow.getDayOfWeek().getValue();
+                int dayStep = schedule.getDaysOfWeek().stream().mapToInt(day ->
+                        (day.ordinal() + 1 - currentDayOfWeek + 7) % 7
+                ).min().orElseThrow();
+                schedule.setRunAt(LocalDateTime.of(dateNow, startTime).plusDays(dayStep));
+                groupScheduleRepository.save(schedule);
             }
             case ONE_TIME -> {
                 cronExpression = String.format("0 %d %d * * *", startTime.getMinute(), startTime.getHour());
+
+                if (startTime.isBefore(timeNow)) schedule.setRunAt(LocalDateTime.of(dateNow.plusDays(1), startTime));
+                else schedule.setRunAt(LocalDateTime.of(dateNow, startTime));
+                groupScheduleRepository.save(schedule);
 
                 var scheduler = taskScheduler.schedule(() ->
                         {
@@ -79,8 +104,21 @@ public class GroupSchedulerService {
             }
         }
 
-        var scheduler = taskScheduler.schedule(() ->
-                groupWateringService.runByScheduler(schedule.getGroup().getId(), schedule.getDuration()),
+        var scheduler = taskScheduler.schedule(() -> {
+                    Repeat type = schedule.getRepeatType();
+                    groupWateringService.runByScheduler(schedule.getGroup().getId(), schedule.getDuration());
+                    if (type == Repeat.EVERYDAY) {
+                        schedule.setRunAt(schedule.getRunAt().plusDays(1));
+                        groupScheduleRepository.save(schedule);
+                    } else if (type == Repeat.DAYS) {
+                        int currentDayOfWeek = LocalDate.now().getDayOfWeek().getValue();
+                        int dayStep = schedule.getDaysOfWeek().stream().mapToInt(day ->
+                                (day.ordinal() + 1 - currentDayOfWeek + 6) % 7 + 1
+                        ).min().orElseThrow();
+                        schedule.setRunAt(schedule.getRunAt().plusDays(dayStep));
+                        groupScheduleRepository.save(schedule);
+                    }
+                },
                 new CronTrigger(cronExpression));
 
         schedules.put(schedule.getId(), scheduler);
@@ -128,7 +166,14 @@ public class GroupSchedulerService {
             runSchedule(schedule);
         }
 
-        return scheduleMapper.toScheduleResponse(schedule);
+        var response = scheduleMapper.toScheduleResponse(schedule);
+        if (schedule.isStatus()) {
+            response.setRunAfter(Duration.between(LocalDateTime.now(), schedule.getRunAt()).getSeconds());
+        } else {
+            response.setRunAfter(-1);
+        }
+
+        return response;
     }
 
     public void trigger(String id, String scheduleId, TriggerRequest request) {
@@ -144,14 +189,29 @@ public class GroupSchedulerService {
         var group = groupService.getById(id);
 
         List<GroupSchedule> schedules = groupScheduleRepository.findAllByGroup(group, pageable);
-        return schedules.stream().map(scheduleMapper::toScheduleResponse).toList();
+        return schedules.stream().map(schedule -> {
+            var response = scheduleMapper.toScheduleResponse(schedule);
+            if (schedule.isStatus()) {
+                response.setRunAfter(Duration.between(LocalDateTime.now(), schedule.getRunAt()).getSeconds());
+            } else {
+                response.setRunAfter(-1);
+            }
+            return response;
+        }).toList();
     }
 
     public ScheduleResponse get(String id, String scheduleId) {
         var group = groupService.getById(id);
         var schedule = groupScheduleRepository.findByIdAndGroup(scheduleId, group)
                 .orElseThrow(() -> new AppException(ErrorCode.SCHEDULE_NOT_EXISTED));
-        return scheduleMapper.toScheduleResponse(schedule);
+
+        var response = scheduleMapper.toScheduleResponse(schedule);
+        if (schedule.isStatus()) {
+            response.setRunAfter(Duration.between(LocalDateTime.now(), schedule.getRunAt()).getSeconds());
+        } else {
+            response.setRunAfter(-1);
+        }
+        return response;
     }
 
     public long getQuantity(String groupId) {

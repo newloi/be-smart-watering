@@ -9,8 +9,10 @@ import com.smart_watering_system.SmartWateringSystem.enums.ErrorCode;
 import com.smart_watering_system.SmartWateringSystem.exception.AppException;
 import com.smart_watering_system.SmartWateringSystem.mapper.DeviceMapper;
 import com.smart_watering_system.SmartWateringSystem.mapper.GroupMapper;
+import com.smart_watering_system.SmartWateringSystem.mapper.ScheduleMapper;
 import com.smart_watering_system.SmartWateringSystem.repository.DeviceRepository;
 import com.smart_watering_system.SmartWateringSystem.repository.GroupRepository;
+import com.smart_watering_system.SmartWateringSystem.repository.GroupScheduleRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -18,7 +20,10 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -63,9 +68,9 @@ public class GroupService {
     public List<GroupResponse> getAll(Pageable pageable) {
         var groups = groupRepository.findAllByUser(userService.getUser(), pageable);
         return groups.stream().map(group -> {
-            var groupResponse = groupMapper.toGroupResponse(group);
-            groupResponse.setDevicesQuantity(deviceService.getQuantityByGroup(group));
-            return groupResponse;
+            var response = groupMapper.toGroupResponse(group);
+            response.setDevicesQuantity(deviceService.getQuantityByGroup(group));
+            return response;
         }).toList();
     }
 

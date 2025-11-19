@@ -73,6 +73,7 @@ public class DeviceSchedulerService {
         switch (repeatType) {
             case EVERYDAY -> {
                 cronExpression = String.format("0 %d %d * * *", startTime.getMinute(), startTime.getHour());
+
                 if (startTime.isBefore(timeNow)) schedule.setRunAt(LocalDateTime.of(dateNow.plusDays(1), startTime));
                 else schedule.setRunAt(LocalDateTime.of(dateNow, startTime));
                 deviceScheduleRepository.save(schedule);
@@ -90,6 +91,7 @@ public class DeviceSchedulerService {
             }
             case ONE_TIME -> {
                 cronExpression = String.format("0 %d %d * * *", startTime.getMinute(), startTime.getHour());
+
                 if (startTime.isBefore(timeNow)) schedule.setRunAt(LocalDateTime.of(dateNow.plusDays(1), startTime));
                 else schedule.setRunAt(LocalDateTime.of(dateNow, startTime));
                 deviceScheduleRepository.save(schedule);

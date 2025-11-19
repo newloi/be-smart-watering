@@ -18,4 +18,5 @@ public class GroupDetailResponse {
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
     List<DeviceResponse> devices;
+    ScheduleResponse nextSchedule;
 }
