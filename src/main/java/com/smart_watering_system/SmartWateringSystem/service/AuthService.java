@@ -65,8 +65,9 @@ public class AuthService {
         if(!Objects.equals(request.getNewPassword(), request.getConfirmNewPassword()))
             throw new AppException(ErrorCode.PASS_NOT_MATCH);
 
-        User user = userRepository.findByUsername(request.getUsername()).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-        tokenService.verifyOtp(VerifyRequest.builder().email(user.getEmail()).code(request.getCode()).build());
+        String email = request.getEmail();
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.WRONG_EMAIL));
+        tokenService.verifyOtp(VerifyRequest.builder().email(email).code(request.getCode()).build());
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
 

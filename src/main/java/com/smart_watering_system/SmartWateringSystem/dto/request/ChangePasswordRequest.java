@@ -13,8 +13,8 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ChangePasswordRequest {
     @NotBlank(message = "NOT_BLANK")
-    @Size(min = 3, message = "INVALID_USERNAME")
-    String username;
+    @Email(message = "INVALID_EMAIL")
+    String email;
 
     @NotBlank(message = "NOT_BLANK")
     @Size(min = 8, message = "INVALID_PASSWORD")
