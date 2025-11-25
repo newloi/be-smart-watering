@@ -25,6 +25,7 @@ public class SecurityConfig {
             "/auth/refresh",
             "/auth/introspect",
             "/auth/verify",
+            "/auth/change-password",
             "/mail/send"
     };
 

@@ -61,17 +61,12 @@ public class AuthService {
         tokenService.deleteToken(signedJWT);
     }
 
-    public void changePassword(String authHeader, ChangePasswordRequest request) throws ParseException {
-        User user = userService.getUser();
-
+    public void changePassword(ChangePasswordRequest request) {
         if(!Objects.equals(request.getNewPassword(), request.getConfirmNewPassword()))
             throw new AppException(ErrorCode.PASS_NOT_MATCH);
 
-        String token = authHeader.split(" ")[1];
-        SignedJWT signedJWT = SignedJWT.parse(token);
-        String email = signedJWT.getJWTClaimsSet().getClaim("email").toString();
-
-        tokenService.verifyOtp(VerifyRequest.builder().email(email).code(request.getCode()).build());
+        User user = userRepository.findByUsername(request.getUsername()).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        tokenService.verifyOtp(VerifyRequest.builder().email(user.getEmail()).code(request.getCode()).build());
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
 

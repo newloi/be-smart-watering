@@ -97,9 +97,8 @@ public class AuthController {
     }
 
     @PostMapping("/change-password")
-    ApiResponse<Void> changePassword(@RequestHeader("Authorization") String authHeader,
-                                     @RequestBody @Valid ChangePasswordRequest request) throws ParseException {
-        authService.changePassword(authHeader, request);
+    ApiResponse<Void> changePassword(@RequestBody @Valid ChangePasswordRequest request) {
+        authService.changePassword(request);
 
         return ApiResponse.<Void>builder()
                 .statusCode(HttpStatus.OK.value())
