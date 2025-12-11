@@ -45,7 +45,7 @@ public class DeviceService {
 
         device.setTopicSensor("sensor/" + request.getDeviceId());
         device.setTopicWatering("watering/" + request.getDeviceId());
-        device.setOnline(false);
+        device.setOnline(true);
         device.setUser(userService.getUser());
 
         try {

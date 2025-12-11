@@ -136,7 +136,6 @@ public class RealtimeService {
 
                 boolean isOnline = json.get("isOnline").asBoolean();
                 if (device.isOnline() != isOnline) {
-                    device.setOnline(isOnline);
                     if(!isOnline && device.isWatering()) {
                         Device finalDevice = device;
                         taskExecutor.execute(() -> {
@@ -149,16 +148,22 @@ public class RealtimeService {
                             } catch (MqttException | JsonProcessingException e) {
                                 log.error("RealtimeService.sendDeviceStatus.taskExecutor: {}", e.getMessage());
                             }
+                            sendMessageTo(
+                                    finalDevice.getUser().getUsername(),
+                                    "{\"isWatering\":false}",
+                                    "/devices/watering", "/device/" + finalDevice.getTopicWatering());
                             finalDevice.setWatering(false);
                             deviceRepository.save(finalDevice);
                         });
                     }
+                    device.setOnline(isOnline);
                     device = deviceRepository.save(device);
                 }
 
                 if (json instanceof ObjectNode objectNode) {
                     objectNode.put("deviceId", deviceId);
                 }
+
                 sendMessageTo(
                         device.getUser().getUsername(),
                         objectMapper.writeValueAsString(json),
