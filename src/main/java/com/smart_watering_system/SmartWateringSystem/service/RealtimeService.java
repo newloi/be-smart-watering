@@ -150,7 +150,7 @@ public class RealtimeService {
                             }
                             sendMessageTo(
                                     finalDevice.getUser().getUsername(),
-                                    "{\"isWatering\":false}",
+                                    "{\"isWatering\":false,\"deviceId\":\"" + deviceId + "\"}",
                                     "/devices/watering", "/device/" + finalDevice.getTopicWatering());
                             finalDevice.setWatering(false);
                             deviceRepository.save(finalDevice);
